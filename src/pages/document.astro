@@ -4,7 +4,6 @@
  */
 import BaseLayout from '../layouts/BaseLayout.astro';
 import SectionHeading from '../components/ui/SectionHeading.astro';
-import PricingTable from '../components/ui/PricingTable.astro';
 
 const bondPricing = [
   {
@@ -35,32 +34,6 @@ const bondPricing = [
     long: '₱15.00',
     details: 'Full-color background on bond paper',
   },
-];
-
-const colorPricing = [
-  { option: 'Colored Text — Short / A4', price: '₱5.00', details: 'Color text printing for presentations and documents' },
-  { option: 'Colored Text — Long', price: '₱6.00', details: 'Legal-size colored text printing' },
-];
-
-const copyPricing = [
-  { option: 'Black & white photocopy', price: '₱2.00', details: 'Fast, clear copies for documents and forms' },
-  { option: 'Color photocopy', price: '₱5.00', details: 'High-quality color photocopying' },
-  { option: 'ID / small prints', price: '₱2.00', details: 'Compact copies for IDs and small documents' },
-];
-
-const scanPricing = [
-  { option: 'Document scanning', price: '₱5.00', details: 'High-resolution scanning to PDF or image files' },
-  { option: 'USB / email delivery', price: '₱5.00', details: 'Files delivered on USB or emailed after scanning' },
-];
-
-const editPricing = [
-  { option: 'Document Editing', price: '₱20+', details: 'Document layout, formatting, and print-ready adjustments' },
-  { option: 'Rush fee', price: '₱10–₱30', details: 'Priority handling for urgent orders' },
-];
-
-const extraPricing = [
-  { option: 'Softcopy printing assistance', price: '₱10–₱20', details: 'Help preparing digital files for printing' },
-  { option: 'Bulk order inquiry', price: 'Varies', details: 'Ask us about discounts for larger print jobs' },
 ];
 ---
 
@@ -118,6 +91,7 @@ const extraPricing = [
           </table>
         </div>
       </div>
+    </div>
   </section>
 
 </BaseLayout>
