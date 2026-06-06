@@ -8,7 +8,7 @@ export const siteConfig: SiteConfig = {
   address: '123 Sample Street, Barangay Example, City, Province',
   googleMapsUrl: 'https://maps.google.com',
   googleMapsEmbedUrl: 'https://maps.google.com/maps?q=&output=embed',
-  facebookUrl: 'https://facebook.com/lkprint',
+  facebookUrl: 'https://www.facebook.com/lkprintservices',
   messengerUrl: 'https://m.me/lkprint',
   whatsappUrl: 'https://wa.me/639000000000',
   businessHours: [
@@ -17,10 +17,10 @@ export const siteConfig: SiteConfig = {
     { day: 'Sunday',          hours: 'Closed' },
   ],
   navLinks: [
-    { label: 'Home',                  href: '/' },
-    { label: 'Document Services',     href: '/document-services/' },
-    { label: 'Photo Printing',        href: '/photo-printing/' },
-    { label: 'Lamination & Finishing',href: '/lamination-finishing/' },
-    { label: 'Contact',               href: '/contact/' },
+    { label: 'Home',                  href: '/lkprint/' },
+    { label: 'Document Services',     href: '/lkprint/document-services/' },
+    { label: 'Photo Printing',        href: '/lkprint/photo-printing/' },
+    { label: 'Lamination & Finishing',href: '/lkprint/lamination-finishing/' },
+    { label: 'Contact',               href: '/lkprint/contact/' },
   ],
 };
