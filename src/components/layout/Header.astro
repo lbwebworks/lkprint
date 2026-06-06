@@ -17,8 +17,17 @@ import MobileMenu from './MobileMenu.astro';
 const currentPath = Astro.url.pathname;
 
 function isActive(href: string): boolean {
-  if (href === '/') return currentPath === '/';
-  return currentPath.startsWith(href);
+  const normalizedCurrent = currentPath.replace(/\/$/, '');
+  const normalizedHref = href.replace(/\/$/, '');
+
+  if (normalizedHref === '/lkprint') {
+    return normalizedCurrent === '/lkprint';
+  }
+
+  return (
+    normalizedCurrent === normalizedHref ||
+    normalizedCurrent.startsWith(normalizedHref + '/')
+  );
 }
 
 // Separate CTA link from regular nav links
@@ -70,14 +79,6 @@ const navLinks = siteConfig.navLinks.filter(l => l.href !== '/contact/');
           )}
         </a>
       ))}
-
-      <!-- Primary CTA -->
-      <a
-        href="/lkprint/contact/"
-        class="btn btn-primary btn-md ml-2"
-      >
-        Contact
-      </a>
     </nav>
 
     <!-- ── Mobile menu button ─────────────────────────────────────────── -->

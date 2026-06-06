@@ -10,7 +10,7 @@ export const services: ServiceItem[] = [
     icon: 'printer',
     category: 'document',
     priceNote: 'From ₱2.00',
-    href: '/document-services/',
+    href: '/lkprint/document/',
   },
   {
     id: 'colored-printing',
@@ -20,7 +20,7 @@ export const services: ServiceItem[] = [
     icon: 'color-swatch',
     category: 'document',
     priceNote: 'From ₱5.00',
-    href: '/document-services/',
+    href: '/lkprint/document/',
   },
   {
     id: 'photocopy',
@@ -30,7 +30,7 @@ export const services: ServiceItem[] = [
     icon: 'copy',
     category: 'document',
     priceNote: 'From ₱2.00',
-    href: '/document-services/',
+    href: '/lkprint/document/',
   },
   {
     id: 'scanning',
@@ -40,7 +40,7 @@ export const services: ServiceItem[] = [
     icon: 'scan',
     category: 'document',
     priceNote: 'From ₱5.00',
-    href: '/document-services/',
+    href: '/lkprint/document/',
   },
   {
     id: 'layout-editing',
@@ -50,7 +50,7 @@ export const services: ServiceItem[] = [
     icon: 'edit',
     category: 'document',
     priceNote: 'From ₱20.00',
-    href: '/document-services/',
+    href: '/lkprint/document/',
   },
 
   // ── Photo Services ─────────────────────────────────────────────────────────
@@ -62,7 +62,7 @@ export const services: ServiceItem[] = [
     icon: 'photograph',
     category: 'photo',
     priceNote: 'From ₱10.00',
-    href: '/photo-printing/',
+    href: '/lkprint/photo/',
   },
   {
     id: 'id-photo',
@@ -72,7 +72,7 @@ export const services: ServiceItem[] = [
     icon: 'identification',
     category: 'photo',
     priceNote: 'From ₱10.00',
-    href: '/photo-printing/',
+    href: '/lkprint/photo/',
   },
   {
     id: 'sticker-printing',
@@ -82,7 +82,7 @@ export const services: ServiceItem[] = [
     icon: 'photograph',
     category: 'photo',
     priceNote: 'From ₱25.00',
-    href: '/photo-printing/',
+    href: '/lkprint/photo/',
   },
 
   // ── Finishing Services ─────────────────────────────────────────────────────
@@ -94,7 +94,7 @@ export const services: ServiceItem[] = [
     icon: 'shield-check',
     category: 'finishing',
     priceNote: 'From ₱10.00',
-    href: '/lamination-finishing/',
+    href: '/lkprint/lamination/',
   },
 ];
 

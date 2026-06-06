@@ -11,8 +11,7 @@ export default defineConfig({
 
   // If this is hosted as a GitHub Pages project site, enable the repo base path.
   // Use base path only for production builds; local dev uses '/'
-  base: process.env.NODE_ENV === 'production' ? '/lkprint' : '/',
-
+  base: '/lkprint',
   output: 'static',
 
   integrations: [

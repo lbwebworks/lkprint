@@ -43,12 +43,12 @@ interface Props {
 const {
   headline    = `Fast & Affordable\nPrinting Services`,
   subheadline = 'Documents, photos, lamination, and more — ready when you need them. Serving students and businesses in our community.',
-  primaryCta  = { label: 'Browse Services', href: '/document-services/' },
+  primaryCta  = undefined,
   secondaryCta = undefined,
-  showStats   = true,
+  showStats   = false,
   stats = [
-    { value: '₱1', label: 'B&W printing from' },
-    { value: 'Fast', label: 'Same-day service' },
+    { value: '₱2', label: 'B&W printing' },
+    { value: 'Reliable', label: 'Same-day service' },
     { value: '9+', label: 'Services available' },
     { value: '6 days', label: 'Open weekly' },
   ],
@@ -110,19 +110,21 @@ const headlineLines = headline.split('\n');
       </p>
 
       <!-- CTAs -->
-      <div class="flex flex-col items-center justify-center gap-3 sm:flex-row sm:gap-4">
-        <a href={primaryCta.href} class="btn btn-white btn-xl w-full sm:w-auto">
-          {primaryCta.label}
-          <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-          </svg>
-        </a>
-        {secondaryCta && (
-          <a href={secondaryCta.href} class="btn btn-white-outline btn-xl w-full sm:w-auto">
-            {secondaryCta.label}
+      {primaryCta && (
+        <div class="flex flex-col items-center justify-center gap-3 sm:flex-row sm:gap-4">
+          <a href={primaryCta.href} class="btn btn-white btn-xl w-full sm:w-auto">
+            {primaryCta.label}
+            <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+            </svg>
           </a>
-        )}
-      </div>
+          {secondaryCta && (
+            <a href={secondaryCta.href} class="btn btn-white-outline btn-xl w-full sm:w-auto">
+              {secondaryCta.label}
+            </a>
+          )}
+        </div>
+      )}
 
     </div>
   </div>

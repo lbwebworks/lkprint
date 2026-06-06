@@ -51,12 +51,10 @@ export interface PhotoPackage {
   id: string;
   name: string;
   category: string;
-  /** Human-readable print sizes included, e.g. ["3R (3.5×5\")", "4R (4×6\")"] */
-  sizes: string[];
+  /** Actual paper size, e.g. "A4", "4R", "A5" */
+  size: string;
   /** Starting price in local currency */
-  priceFrom?: number;
-  /** Additional pricing context, e.g. "per piece" or "per set of 6" */
-  pricingUnit?: string;
+  price?: number;
   /** Path relative to /public, e.g. /images/photo-packages/wallet.jpg */
   imagePreview: string;
   /** Alt text for the preview image */

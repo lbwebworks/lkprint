@@ -4,7 +4,7 @@ export const siteConfig: SiteConfig = {
   businessName: 'LK Print',
   tagline: 'Quality Printing, Fast & Affordable',
   phone: '+63 900 000 0000',          // ← update with real number
-  email: 'hello@lkprint.com',          // ← update with real email
+  email: 'leeandkishprintingservice@gmail.com',          // ← update with real email
   address: '123 Sample Street, Barangay Example, City, Province',
   googleMapsUrl: 'https://maps.google.com',
   googleMapsEmbedUrl: 'https://maps.google.com/maps?q=&output=embed',
@@ -18,9 +18,10 @@ export const siteConfig: SiteConfig = {
   ],
   navLinks: [
     { label: 'Home',                  href: '/lkprint/' },
-    { label: 'Document Services',     href: '/lkprint/document-services/' },
-    { label: 'Photo Printing',        href: '/lkprint/photo-printing/' },
-    { label: 'Lamination & Finishing',href: '/lkprint/lamination-finishing/' },
+    { label: 'Document',              href: '/lkprint/document/' },
+    { label: 'Photo',                 href: '/lkprint/photo/' },
+    { label: 'Lamination',            href: '/lkprint/lamination/' },
+    { label: 'Others',                 href: '/lkprint/others/' },
     { label: 'Contact',               href: '/lkprint/contact/' },
   ],
 };
