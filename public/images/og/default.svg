@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" role="img" aria-labelledby="title desc">
+  <title id="title">LK Print</title>
+  <desc id="desc">LK Print logo placeholder for social preview image.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0%" stop-color="#3b82f6" />
+      <stop offset="100%" stop-color="#60a5fa" />
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="630" fill="url(#bg)" />
+  <rect x="100" y="120" width="1000" height="390" rx="40" fill="rgba(255,255,255,0.12)" />
+  <text x="600" y="320" text-anchor="middle" fill="#ffffff" font-family="Inter, system-ui, sans-serif" font-size="72" font-weight="700">LK Print</text>
+  <text x="600" y="390" text-anchor="middle" fill="#e0f2fe" font-family="Inter, system-ui, sans-serif" font-size="32">Quality printing, fast service</text>
+</svg>

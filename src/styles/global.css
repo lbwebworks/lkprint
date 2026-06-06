@@ -1,0 +1,326 @@
+@import "tailwindcss";
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   DESIGN SYSTEM — LK Print
+   Tailwind v4 @theme block — all tokens available as utilities & CSS vars
+───────────────────────────────────────────────────────────────────────────── */
+@theme {
+  /* ── Brand blue ───────────────────────────────────────────────────────── */
+  --color-brand-50:  #eff6ff;
+  --color-brand-100: #dbeafe;
+  --color-brand-200: #bfdbfe;
+  --color-brand-300: #93c5fd;
+  --color-brand-400: #60a5fa;
+  --color-brand-500: #3b82f6;
+  --color-brand-600: #2563eb;   /* primary action */
+  --color-brand-700: #1d4ed8;   /* hover */
+  --color-brand-800: #1e40af;   /* active / dark bg text */
+  --color-brand-900: #1e3a8a;   /* footer / deep bg */
+  --color-brand-950: #172554;
+
+  /* ── Accent orange — "sale" labels, highlights ────────────────────────── */
+  --color-accent-50:  #fff7ed;
+  --color-accent-100: #ffedd5;
+  --color-accent-200: #fed7aa;
+  --color-accent-400: #fb923c;
+  --color-accent-500: #f97316;
+  --color-accent-600: #ea580c;
+
+  /* ── Success green ────────────────────────────────────────────────────── */
+  --color-success-50:  #f0fdf4;
+  --color-success-100: #dcfce7;
+  --color-success-500: #22c55e;
+  --color-success-600: #16a34a;
+  --color-success-700: #15803d;
+
+  /* ── Neutral grays ────────────────────────────────────────────────────── */
+  --color-surface-50:  #f8fafc;  /* page background tint */
+  --color-surface-100: #f1f5f9;  /* section bg, input bg */
+  --color-surface-200: #e2e8f0;  /* dividers, borders */
+
+  /* ── Typography ───────────────────────────────────────────────────────── */
+  --font-sans:    'Inter', ui-sans-serif, system-ui, sans-serif;
+  --font-display: 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif;
+
+  /* ── Type scale (rem) ─────────────────────────────────────────────────── */
+  --text-xs:   0.75rem;    /* 12px — labels, captions */
+  --text-sm:   0.875rem;   /* 14px — body small, badge */
+  --text-base: 1rem;       /* 16px — body */
+  --text-lg:   1.125rem;   /* 18px — lead */
+  --text-xl:   1.25rem;    /* 20px — card title */
+  --text-2xl:  1.5rem;     /* 24px — section sub-heading */
+  --text-3xl:  1.875rem;   /* 30px — section heading mobile */
+  --text-4xl:  2.25rem;    /* 36px — section heading desktop */
+  --text-5xl:  3rem;       /* 48px — hero heading mobile */
+  --text-6xl:  3.75rem;    /* 60px — hero heading desktop */
+
+  /* ── Spacing / sizing ─────────────────────────────────────────────────── */
+  --radius-sm:  0.375rem;  /* 6px  */
+  --radius-md:  0.5rem;    /* 8px  */
+  --radius-lg:  0.75rem;   /* 12px */
+  --radius-xl:  1rem;      /* 16px */
+  --radius-2xl: 1.5rem;    /* 24px */
+
+  /* ── Shadows ──────────────────────────────────────────────────────────── */
+  --shadow-card: 0 1px 3px 0 rgb(0 0 0 / 0.07), 0 1px 2px -1px rgb(0 0 0 / 0.07);
+  --shadow-card-hover: 0 4px 12px 0 rgb(0 0 0 / 0.10), 0 2px 4px -2px rgb(0 0 0 / 0.08);
+  --shadow-navbar: 0 1px 0 0 rgb(0 0 0 / 0.06);
+
+  /* ── Transitions ──────────────────────────────────────────────────────── */
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   BASE LAYER — element defaults
+───────────────────────────────────────────────────────────────────────────── */
+@layer base {
+  *, *::before, *::after {
+    box-sizing: border-box;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  body {
+    @apply bg-white text-gray-800 font-sans;
+    line-height: 1.6;
+  }
+
+  .skip-link {
+    @apply absolute left-4 top-4 z-50 rounded-md bg-white px-3 py-2 text-sm font-semibold text-brand-700 shadow-md transition duration-150 opacity-0 -translate-y-2;
+  }
+
+  .skip-link:focus-visible {
+    @apply opacity-100 translate-y-0;
+  }
+
+  /* Heading hierarchy */
+  h1 {
+    @apply font-display font-extrabold tracking-tight text-gray-900;
+    line-height: 1.1;
+  }
+  h2 {
+    @apply font-display font-bold tracking-tight text-gray-900;
+    line-height: 1.2;
+  }
+  h3, h4 {
+    @apply font-display font-bold text-gray-900;
+    line-height: 1.3;
+  }
+  h5, h6 {
+    @apply font-display font-semibold text-gray-900;
+  }
+
+  p {
+    @apply text-gray-600;
+  }
+
+  img, video {
+    @apply max-w-full h-auto;
+  }
+
+  a {
+    @apply transition-colors duration-150;
+  }
+
+  button {
+    @apply cursor-pointer;
+  }
+
+  /* Global focus ring — accessible, brand-consistent */
+  :focus-visible {
+    outline: 2px solid var(--color-brand-500);
+    outline-offset: 3px;
+    border-radius: var(--radius-sm);
+  }
+
+  /* Reduce motion */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   COMPONENT LAYER — shared patterns used across multiple components
+───────────────────────────────────────────────────────────────────────────── */
+@layer components {
+
+  /* ── Layout containers ──────────────────────────────────────────────── */
+  .container-content {
+    @apply mx-auto w-full max-w-7xl;
+  }
+
+  .section-padding {
+    @apply px-4 py-16 sm:px-6 sm:py-20 lg:px-8;
+  }
+
+  .section-padding-sm {
+    @apply px-4 py-10 sm:px-6 sm:py-14 lg:px-8;
+  }
+
+  /* ── Typography helpers ─────────────────────────────────────────────── */
+  .heading-xl {
+    @apply font-display text-4xl font-extrabold tracking-tight text-gray-900 sm:text-5xl lg:text-6xl;
+  }
+
+  .heading-lg {
+    @apply font-display text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl;
+  }
+
+  .heading-md {
+    @apply font-display text-2xl font-bold tracking-tight text-gray-900 sm:text-3xl;
+  }
+
+  .heading-sm {
+    @apply font-display text-xl font-bold text-gray-900;
+  }
+
+  .body-lead {
+    @apply text-lg text-gray-500 leading-relaxed;
+  }
+
+  .body-base {
+    @apply text-base text-gray-600 leading-relaxed;
+  }
+
+  .body-sm {
+    @apply text-sm text-gray-500 leading-relaxed;
+  }
+
+  .label-xs {
+    @apply text-xs font-semibold uppercase tracking-wider text-gray-400;
+  }
+
+  /* ── Button base — extend via modifier classes ──────────────────────── */
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg font-semibold
+           transition-all duration-150 select-none
+           focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500
+           disabled:pointer-events-none disabled:opacity-50;
+  }
+
+  .btn-sm  { @apply px-3.5 py-2 text-sm; }
+  .btn-md  { @apply px-5 py-2.5 text-sm; }
+  .btn-lg  { @apply px-6 py-3 text-base; }
+  .btn-xl  { @apply px-8 py-4 text-base font-bold; }
+
+  .btn-primary {
+    @apply bg-brand-600 text-white shadow-sm
+           hover:bg-brand-700 active:bg-brand-800
+           hover:shadow-md hover:-translate-y-px active:translate-y-0;
+  }
+
+  .btn-outline {
+    @apply border-2 border-brand-600 text-brand-600 bg-transparent
+           hover:bg-brand-50 active:bg-brand-100;
+  }
+
+  .btn-white {
+    @apply bg-white text-brand-700 shadow
+           hover:bg-brand-50 active:bg-brand-100;
+  }
+
+  .btn-white-outline {
+    @apply border-2 border-white/70 text-white bg-transparent
+           hover:bg-white/10 hover:border-white active:bg-white/20;
+  }
+
+  .btn-ghost {
+    @apply text-brand-600 hover:bg-brand-50 active:bg-brand-100;
+  }
+
+  .btn-accent {
+    @apply bg-accent-500 text-white shadow-sm
+           hover:bg-accent-600 active:bg-accent-600
+           hover:shadow-md hover:-translate-y-px active:translate-y-0;
+  }
+
+  /* ── Card base ──────────────────────────────────────────────────────── */
+  .card {
+    @apply rounded-xl border border-gray-200 bg-white;
+    box-shadow: var(--shadow-card);
+  }
+
+  .card-hover {
+    @apply transition-all duration-200
+           hover:-translate-y-0.5;
+    box-shadow: var(--shadow-card);
+  }
+
+  .card-hover:hover {
+    box-shadow: var(--shadow-card-hover);
+  }
+
+  /* ── Badge ──────────────────────────────────────────────────────────── */
+  .badge {
+    @apply inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-semibold;
+  }
+
+  .badge-brand   { @apply bg-brand-100 text-brand-700; }
+  .badge-accent  { @apply bg-accent-100 text-accent-600; }
+  .badge-success { @apply bg-success-100 text-success-700; }
+  .badge-gray    { @apply bg-gray-100 text-gray-600; }
+
+  /* ── Icon wrapper ───────────────────────────────────────────────────── */
+  .icon-box {
+    @apply flex shrink-0 items-center justify-center rounded-xl
+           bg-brand-50 text-brand-600;
+  }
+
+  .icon-box-sm  { @apply h-10 w-10; }
+  .icon-box-md  { @apply h-12 w-12; }
+  .icon-box-lg  { @apply h-14 w-14; }
+
+  /* ── Divider ────────────────────────────────────────────────────────── */
+  .divider {
+    @apply border-t border-gray-200;
+  }
+
+  /* ── Tag/chip for print sizes ───────────────────────────────────────── */
+  .size-chip {
+    @apply rounded-md bg-surface-100 px-2 py-0.5 text-xs font-medium text-gray-600
+           border border-surface-200;
+  }
+
+  /* ── Contact detail row ─────────────────────────────────────────────── */
+  .contact-row {
+    @apply flex items-start gap-4;
+  }
+
+  .contact-row-icon {
+    @apply flex shrink-0 items-center justify-center rounded-xl bg-brand-50 text-brand-600 h-12 w-12;
+  }
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   UTILITY LAYER — one-off helpers
+───────────────────────────────────────────────────────────────────────────── */
+@layer utilities {
+  /* Text balance for headings */
+  .text-balance  { text-wrap: balance; }
+  .text-pretty   { text-wrap: pretty; }
+
+  /* Gradient text */
+  .text-gradient {
+    @apply bg-clip-text text-transparent;
+    background-image: linear-gradient(135deg, var(--color-brand-600), var(--color-brand-400));
+  }
+
+  /* Subtle section backgrounds */
+  .bg-section        { background-color: var(--color-surface-50); }
+  .bg-section-strong { background-color: var(--color-surface-100); }
+
+  /* Scrollbar hide utility */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar { display: none; }
+}

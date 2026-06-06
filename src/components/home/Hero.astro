@@ -1,0 +1,147 @@
+---
+/**
+ * Hero Section
+ * ────────────
+ * Full-width homepage hero with headline, subtext, primary + secondary CTA,
+ * and an optional stats strip below.
+ *
+ * Props:
+ *   headline     — main bold headline (supports line breaks with \n)
+ *   subheadline  — supporting paragraph
+ *   primaryCta   — { label, href }
+ *   secondaryCta — { label, href } (optional)
+ *   showStats    — whether to render the trust-indicator strip (default true)
+ *
+ * Usage:
+ *   <Hero
+ *     headline="Fast, Affordable\nPrinting Services"
+ *     subheadline="Documents, photos, lamination and more — ready when you are."
+ *     primaryCta={{ label: 'See Our Services', href: '/document-services/' }}
+ *   />
+ */
+import { siteConfig } from '../../data/siteConfig';
+
+interface CtaLink {
+  label: string;
+  href: string;
+}
+
+interface Stat {
+  value: string;
+  label: string;
+}
+
+interface Props {
+  headline?: string;
+  subheadline?: string;
+  primaryCta?: CtaLink;
+  secondaryCta?: CtaLink;
+  showStats?: boolean;
+  stats?: Stat[];
+}
+
+const {
+  headline    = `Fast & Affordable\nPrinting Services`,
+  subheadline = 'Documents, photos, lamination, and more — ready when you need them. Serving students and businesses in our community.',
+  primaryCta  = { label: 'Browse Services', href: '/document-services/' },
+  secondaryCta = undefined,
+  showStats   = true,
+  stats = [
+    { value: '₱1', label: 'B&W printing from' },
+    { value: 'Fast', label: 'Same-day service' },
+    { value: '9+', label: 'Services available' },
+    { value: '6 days', label: 'Open weekly' },
+  ],
+} = Astro.props;
+
+// Split headline on \n for multi-line rendering
+const headlineLines = headline.split('\n');
+---
+
+<section
+  class="relative overflow-hidden bg-gradient-to-br from-brand-900 via-brand-800 to-brand-700"
+  aria-labelledby="hero-heading"
+>
+  <!-- Background decorative grid -->
+  <div
+    class="absolute inset-0 opacity-[0.04]"
+    aria-hidden="true"
+    style="background-image: url(\"data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E\")"
+  />
+
+  <!-- Radial glow -->
+  <div
+    class="absolute -left-32 -top-32 h-96 w-96 rounded-full bg-brand-500/20 blur-3xl"
+    aria-hidden="true"
+  />
+  <div
+    class="absolute -bottom-20 -right-20 h-80 w-80 rounded-full bg-brand-400/15 blur-3xl"
+    aria-hidden="true"
+  />
+
+  <div class="container-content relative mx-auto px-4 py-20 sm:px-6 sm:py-28 lg:px-8 lg:py-32">
+    <div class="mx-auto max-w-3xl text-center">
+
+      <!-- Eyebrow label -->
+      <div class="mb-5 inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-1.5 text-sm font-medium text-brand-200 ring-1 ring-white/20">
+        <span class="h-1.5 w-1.5 rounded-full bg-accent-400" aria-hidden="true"></span>
+        {siteConfig.businessName} · Your Local Print Shop
+      </div>
+
+      <!-- Headline -->
+      <h1
+        id="hero-heading"
+        class="mb-6 font-display text-4xl font-extrabold tracking-tight text-white text-balance sm:text-5xl lg:text-6xl"
+      >
+        {headlineLines.map((line, i) => (
+          <>
+            {i > 0 && <br />}
+            {i === headlineLines.length - 1
+              ? <span class="text-gradient bg-gradient-to-r from-brand-200 to-white bg-clip-text text-transparent">{line}</span>
+              : line
+            }
+          </>
+        ))}
+      </h1>
+
+      <!-- Subheadline -->
+      <p class="mx-auto mb-10 max-w-xl text-lg leading-relaxed text-brand-200 text-pretty">
+        {subheadline}
+      </p>
+
+      <!-- CTAs -->
+      <div class="flex flex-col items-center justify-center gap-3 sm:flex-row sm:gap-4">
+        <a href={primaryCta.href} class="btn btn-white btn-xl w-full sm:w-auto">
+          {primaryCta.label}
+          <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+          </svg>
+        </a>
+        {secondaryCta && (
+          <a href={secondaryCta.href} class="btn btn-white-outline btn-xl w-full sm:w-auto">
+            {secondaryCta.label}
+          </a>
+        )}
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Stats strip -->
+  {showStats && (
+    <div class="relative border-t border-white/10 bg-brand-950/40 backdrop-blur-sm">
+      <div class="container-content mx-auto px-4 sm:px-6 lg:px-8">
+        <dl class="grid grid-cols-2 divide-x divide-white/10 sm:grid-cols-4">
+          {stats.map((stat) => (
+            <div class="flex flex-col items-center px-4 py-5 text-center sm:px-6 sm:py-6">
+              <dt class="order-2 mt-1 text-xs font-medium text-brand-300">{stat.label}</dt>
+              <dd class="order-1 font-display text-2xl font-extrabold text-white sm:text-3xl">
+                {stat.value}
+              </dd>
+            </div>
+          ))}
+        </dl>
+      </div>
+    </div>
+  )}
+</section>

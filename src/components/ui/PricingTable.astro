@@ -1,0 +1,42 @@
+---
+interface PricingRow {
+  option: string;
+  type?: string;
+  dimension?: string;
+  price: string;
+  details: string;
+}
+
+interface Props {
+  rows: PricingRow[];
+}
+
+const { rows } = Astro.props;
+const showTypeColumn = rows.some((row) => row.type);
+const showDimensionColumn = rows.some((row) => row.dimension);
+---
+
+<div class="overflow-x-auto rounded-3xl border border-gray-200 bg-white shadow-sm">
+  <table class="min-w-[560px] w-full divide-y divide-gray-200 text-left text-sm">
+    <thead class="bg-gray-50 text-gray-700">
+      <tr>
+        <th scope="col" class="px-4 py-3 font-semibold">Paper</th>
+        {showTypeColumn && <th scope="col" class="px-4 py-3 font-semibold">Type</th>}
+        {showDimensionColumn && <th scope="col" class="px-4 py-3 font-semibold">Dimensions</th>}
+        <th scope="col" class="px-4 py-3 font-semibold">Price</th>
+        <th scope="col" class="px-4 py-3 font-semibold">Details</th>
+      </tr>
+    </thead>
+    <tbody class="divide-y divide-gray-100 bg-white text-gray-600">
+      {rows.map((row) => (
+        <tr>
+          <td class="whitespace-nowrap px-4 py-4 font-medium text-gray-900">{row.option}</td>
+          {showTypeColumn && <td class="whitespace-nowrap px-4 py-4">{row.type ?? ''}</td>}
+          {showDimensionColumn && <td class="whitespace-nowrap px-4 py-4">{row.dimension ?? ''}</td>}
+          <td class="whitespace-nowrap px-4 py-4">{row.price}</td>
+          <td class="px-4 py-4">{row.details}</td>
+        </tr>
+      ))}
+    </tbody>
+  </table>
+</div>

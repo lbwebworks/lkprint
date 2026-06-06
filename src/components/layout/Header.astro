@@ -1,0 +1,203 @@
+---
+/**
+ * Header / Navbar
+ * ───────────────
+ * Sticky top navigation bar.
+ *
+ * Features:
+ * - Scroll-aware: adds shadow + solid bg after scrolling 10px
+ * - Active page highlighting with aria-current
+ * - Keyboard-accessible mobile drawer with focus trap
+ * - Closes drawer on Escape key or outside click
+ * - WCAG 2.1 AA compliant
+ */
+import { siteConfig } from '../../data/siteConfig';
+import MobileMenu from './MobileMenu.astro';
+
+const currentPath = Astro.url.pathname;
+
+function isActive(href: string): boolean {
+  if (href === '/') return currentPath === '/';
+  return currentPath.startsWith(href);
+}
+
+// Separate CTA link from regular nav links
+const navLinks = siteConfig.navLinks.filter(l => l.href !== '/contact/');
+---
+
+<header
+  id="site-header"
+  class="sticky top-0 z-50 w-full bg-white/95 backdrop-blur-sm transition-shadow duration-200"
+  style="box-shadow: var(--shadow-navbar);"
+  role="banner"
+>
+  <div class="container-content mx-auto flex h-16 items-center justify-between px-4 sm:px-6 lg:px-8">
+
+    <!-- ── Logo ─────────────────────────────────────────────────────── -->
+    <a
+      href="/"
+      class="group flex items-center gap-2.5 font-display text-lg font-extrabold text-brand-800 hover:text-brand-600 sm:text-xl"
+      aria-label={`${siteConfig.businessName} — Return to homepage`}
+    >
+      <span
+        class="flex h-9 w-9 items-center justify-center rounded-lg bg-brand-600 text-sm font-extrabold text-white shadow-sm transition-transform duration-150 group-hover:scale-105"
+        aria-hidden="true"
+      >
+        LK
+      </span>
+      <span class="hidden xs:block sm:block">{siteConfig.businessName}</span>
+    </a>
+
+    <!-- ── Desktop navigation ────────────────────────────────────────── -->
+    <nav class="hidden items-center gap-0.5 md:flex" aria-label="Main navigation">
+      {navLinks.map((link) => (
+        <a
+          href={link.href}
+          class:list={[
+            'relative rounded-md px-3.5 py-2 text-sm font-medium transition-colors duration-150',
+            isActive(link.href)
+              ? 'text-brand-700 bg-brand-50'
+              : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50',
+          ]}
+          aria-current={isActive(link.href) ? 'page' : undefined}
+        >
+          {link.label}
+          {isActive(link.href) && (
+            <span
+              class="absolute bottom-1 left-1/2 h-0.5 w-4 -translate-x-1/2 rounded-full bg-brand-600"
+              aria-hidden="true"
+            />
+          )}
+        </a>
+      ))}
+
+      <!-- Primary CTA -->
+      <a
+        href="/contact/"
+        class="btn btn-primary btn-md ml-2"
+      >
+        Contact
+      </a>
+    </nav>
+
+    <!-- ── Mobile menu button ─────────────────────────────────────────── -->
+    <button
+      id="mobile-menu-button"
+      type="button"
+      class="inline-flex h-10 w-10 items-center justify-center rounded-lg text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-900 md:hidden"
+      aria-controls="mobile-menu"
+      aria-expanded="false"
+      aria-label="Open navigation menu"
+    >
+      <svg
+        id="icon-hamburger"
+        class="h-5 w-5"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        viewBox="0 0 24 24"
+        aria-hidden="true"
+      >
+        <line x1="3" y1="6" x2="21" y2="6" />
+        <line x1="3" y1="12" x2="21" y2="12" />
+        <line x1="3" y1="18" x2="21" y2="18" />
+      </svg>
+      <svg
+        id="icon-close"
+        class="hidden h-5 w-5"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        viewBox="0 0 24 24"
+        aria-hidden="true"
+      >
+        <line x1="18" y1="6" x2="6" y2="18" />
+        <line x1="6" y1="6" x2="18" y2="18" />
+      </svg>
+    </button>
+  </div>
+
+  <!-- Mobile menu (rendered below header) -->
+  <MobileMenu />
+</header>
+
+<!-- Backdrop for mobile menu (outside header so it covers full screen) -->
+<div
+  id="mobile-backdrop"
+  class="fixed inset-0 z-40 bg-black/20 backdrop-blur-[2px] opacity-0 pointer-events-none transition-opacity duration-200 md:hidden"
+  aria-hidden="true"
+></div>
+
+<script>
+  const header  = document.getElementById('site-header')!;
+  const button  = document.getElementById('mobile-menu-button')!;
+  const menu    = document.getElementById('mobile-menu')!;
+  const backdrop = document.getElementById('mobile-backdrop')!;
+  const iconHamburger = document.getElementById('icon-hamburger')!;
+  const iconClose     = document.getElementById('icon-close')!;
+
+  // ── Scroll-aware shadow ────────────────────────────────────────────────
+  const updateShadow = () => {
+    if (window.scrollY > 10) {
+      header.style.boxShadow = '0 1px 10px 0 rgb(0 0 0 / 0.10)';
+    } else {
+      header.style.boxShadow = 'var(--shadow-navbar)';
+    }
+  };
+  window.addEventListener('scroll', updateShadow, { passive: true });
+
+  // ── Toggle helpers ─────────────────────────────────────────────────────
+  const openMenu = () => {
+    menu.classList.remove('hidden', 'animate-slide-up');
+    menu.classList.add('animate-slide-down');
+    backdrop.classList.remove('opacity-0', 'pointer-events-none');
+    backdrop.classList.add('opacity-100');
+    button.setAttribute('aria-expanded', 'true');
+    button.setAttribute('aria-label', 'Close navigation menu');
+    iconHamburger.classList.add('hidden');
+    iconClose.classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+    // Move focus to first menu item for keyboard users
+    const firstLink = menu.querySelector<HTMLAnchorElement>('a');
+    firstLink?.focus();
+  };
+
+  const closeMenu = () => {
+    menu.classList.add('hidden');
+    backdrop.classList.add('opacity-0', 'pointer-events-none');
+    backdrop.classList.remove('opacity-100');
+    button.setAttribute('aria-expanded', 'false');
+    button.setAttribute('aria-label', 'Open navigation menu');
+    iconHamburger.classList.remove('hidden');
+    iconClose.classList.add('hidden');
+    document.body.style.overflow = '';
+  };
+
+  const isOpen = () => button.getAttribute('aria-expanded') === 'true';
+
+  // ── Event listeners ────────────────────────────────────────────────────
+  button.addEventListener('click', () => (isOpen() ? closeMenu() : openMenu()));
+  backdrop.addEventListener('click', closeMenu);
+
+  // Close on Escape
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && isOpen()) {
+      closeMenu();
+      button.focus();
+    }
+  });
+
+  // Close when a nav link inside the menu is clicked
+  menu.querySelectorAll('a').forEach((link) => {
+    link.addEventListener('click', closeMenu);
+  });
+
+  // Close on resize to desktop
+  window.addEventListener('resize', () => {
+    if (window.innerWidth >= 768 && isOpen()) closeMenu();
+  });
+</script>

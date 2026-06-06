@@ -1,0 +1,128 @@
+---
+/**
+ * SEO.astro
+ * Centralised SEO meta tags — import once in BaseLayout.astro.
+ * All pages pass their SEO props down through the layout.
+ */
+import type { SEOProps } from '../types';
+import { siteConfig } from '../data/siteConfig';
+
+interface Props extends SEOProps {}
+
+const {
+  title,
+  description,
+  canonicalUrl,
+  ogImage = '/images/og/default.svg',
+  ogType = 'website',
+  noIndex = false,
+} = Astro.props;
+
+const base = (import.meta.env.BASE_URL || '/').replace(/\/$/, '');
+const siteTitle = `${title} | ${siteConfig.businessName}`;
+const canonicalUrlResolved = canonicalUrl ?? (Astro.site ? new URL(Astro.url.pathname, Astro.site).href : Astro.url.href);
+const relativeOgImage = ogImage.startsWith('http')
+  ? ogImage
+  : `${base}${ogImage.startsWith('/') ? ogImage : '/' + ogImage}`;
+const ogImageUrl = new URL(relativeOgImage, Astro.site ?? Astro.url.origin).href;
+
+const openingHours = siteConfig.businessHours
+  .map((item) => parseOpeningHours(item))
+  .filter((item): item is string => Boolean(item));
+
+const sameAs = [siteConfig.facebookUrl, siteConfig.messengerUrl, siteConfig.whatsappUrl].filter(Boolean);
+
+function parseOpeningHours(item: { day: string; hours: string }): string | undefined {
+  const normalizedHours = item.hours.trim();
+  if (/closed/i.test(normalizedHours)) return undefined;
+
+  const [open, close] = normalizedHours.split('–').map((value) => value.trim());
+  if (!open || !close) return undefined;
+
+  const formattedOpen = formatTime(open);
+  const formattedClose = formatTime(close);
+  if (!formattedOpen || !formattedClose) return undefined;
+
+  const dayParts = item.day.split('–').map((value) => value.trim());
+  const mappedDays = dayParts.map((value) => abbreviateDay(value)).filter(Boolean);
+  if (!mappedDays.length) return undefined;
+
+  return mappedDays.length === 1
+    ? `${mappedDays[0]} ${formattedOpen}-${formattedClose}`
+    : `${mappedDays[0]}-${mappedDays[1]} ${formattedOpen}-${formattedClose}`;
+}
+
+function abbreviateDay(day: string): string | undefined {
+  const mapping: Record<string, string> = {
+    Monday: 'Mo',
+    Tuesday: 'Tu',
+    Wednesday: 'We',
+    Thursday: 'Th',
+    Friday: 'Fr',
+    Saturday: 'Sa',
+    Sunday: 'Su',
+  };
+  return mapping[day.trim()];
+}
+
+function formatTime(value: string): string | undefined {
+  const [time, period] = value.toUpperCase().split(' ');
+  if (!time || !period) return undefined;
+
+  const [hours, minutes = '00'] = time.split(':');
+  const hourNumber = Number(hours);
+  const minuteNumber = Number(minutes);
+
+  if (Number.isNaN(hourNumber) || Number.isNaN(minuteNumber)) return undefined;
+
+  const normalizedHour = period === 'PM' && hourNumber < 12 ? hourNumber + 12 : period === 'AM' && hourNumber === 12 ? 0 : hourNumber;
+  return `${normalizedHour.toString().padStart(2, '0')}:${minuteNumber.toString().padStart(2, '0')}`;
+}
+---
+
+<!-- Primary meta -->
+<title>{siteTitle}</title>
+<meta name="description" content={description} />
+<link rel="canonical" href={canonicalUrlResolved} />
+{noIndex && <meta name="robots" content="noindex, nofollow" />}
+
+<!-- Open Graph -->
+<meta property="og:type" content={ogType} />
+<meta property="og:site_name" content={siteConfig.businessName} />
+<meta property="og:title" content={siteTitle} />
+<meta property="og:description" content={description} />
+<meta property="og:url" content={canonicalUrlResolved} />
+<meta property="og:image" content={ogImageUrl} />
+<meta property="og:image:alt" content={`${siteConfig.businessName} — ${title}`} />
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content={siteTitle} />
+<meta name="twitter:description" content={description} />
+<meta name="twitter:image" content={ogImageUrl} />
+
+<!-- Schema.org LocalBusiness -->
+<script type="application/ld+json" set:html={JSON.stringify({
+  "@context": "https://schema.org",
+  "@type": "LocalBusiness",
+  "name": siteConfig.businessName,
+  "description": siteConfig.tagline,
+  "telephone": siteConfig.phone,
+  "email": siteConfig.email,
+  "address": {
+    "@type": "PostalAddress",
+    "streetAddress": siteConfig.address,
+  },
+  "url": Astro.site?.href ?? canonicalUrlResolved,
+  "openingHours": openingHours,
+  "sameAs": sameAs,
+  "contactPoint": [
+    {
+      "@type": "ContactPoint",
+      "contactType": "Customer service",
+      "telephone": siteConfig.phone,
+      "email": siteConfig.email,
+    },
+  ],
+  "image": ogImageUrl,
+})} />

@@ -1,0 +1,51 @@
+---
+/**
+ * PackageGrid
+ * ───────────
+ * Responsive grid wrapper for PhotoPackage cards.
+ *
+ * Props:
+ *   packages — array of PhotoPackage
+ *   columns  — desktop column count: 2 | 3 | 4  (default: 3)
+ *   priority — passes down to first N cards to eager-load images
+ *
+ * Usage:
+ *   <PackageGrid packages={photoPackages} />
+ *   <PackageGrid packages={featured} columns={4} />
+ */
+import type { PhotoPackage } from '../../types';
+import PackageCard from './PackageCard.astro';
+
+interface Props {
+  packages: PhotoPackage[];
+  columns?: 2 | 3 | 4;
+  /** Number of cards whose images should load eagerly (default: 3) */
+  eagerCount?: number;
+}
+
+const { packages, columns = 3, eagerCount = 3 } = Astro.props;
+
+const colClass: Record<2 | 3 | 4, string> = {
+  2: 'sm:grid-cols-2',
+  3: 'sm:grid-cols-2 lg:grid-cols-3',
+  4: 'sm:grid-cols-2 lg:grid-cols-4',
+};
+---
+
+{packages.length === 0 ? (
+  <div class="py-20 text-center" role="status" aria-live="polite">
+    <p class="text-gray-400">No packages available at the moment.</p>
+  </div>
+) : (
+  <ul
+    class:list={['grid grid-cols-1 gap-5 sm:gap-6', colClass[columns]]}
+    role="list"
+    aria-label="Photo printing packages"
+  >
+    {packages.map((pkg, i) => (
+      <li>
+        <PackageCard package={pkg} priority={i < eagerCount} />
+      </li>
+    ))}
+  </ul>
+)}

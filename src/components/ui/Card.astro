@@ -1,0 +1,49 @@
+---
+/**
+ * Card.astro
+ * Generic card shell with consistent border, shadow, and hover state.
+ * Used as a wrapper for ServiceCard, PackageCard, and any other card-type UI.
+ *
+ * Usage:
+ *   <Card>…your content…</Card>
+ *   <Card hover padding="lg">…</Card>
+ *   <Card as="article">…</Card>
+ */
+export type CardPadding = 'none' | 'sm' | 'md' | 'lg';
+
+interface Props {
+  /** Whether to apply hover lift effect */
+  hover?: boolean;
+  padding?: CardPadding;
+  /** Semantic HTML element (default: div) */
+  as?: 'div' | 'article' | 'section' | 'li';
+  class?: string;
+}
+
+const {
+  hover   = false,
+  padding = 'md',
+  as      = 'div',
+  class: extraClass = '',
+} = Astro.props;
+
+const paddingStyles: Record<CardPadding, string> = {
+  none: '',
+  sm:   'p-4',
+  md:   'p-6',
+  lg:   'p-8',
+};
+
+const Tag = as;
+
+const classes = [
+  'rounded-xl border border-gray-200 bg-white',
+  hover ? 'transition-shadow duration-200 hover:shadow-md' : '',
+  paddingStyles[padding],
+  extraClass,
+].join(' ');
+---
+
+<Tag class={classes}>
+  <slot />
+</Tag>

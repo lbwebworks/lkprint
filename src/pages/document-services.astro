@@ -1,0 +1,212 @@
+---
+/**
+ * Document Services page — /document-services/
+ */
+import BaseLayout from '../layouts/BaseLayout.astro';
+import SectionHeading from '../components/ui/SectionHeading.astro';
+import ContactCTA from '../components/contact/ContactCTA.astro';
+import Card from '../components/ui/Card.astro';
+import PricingTable from '../components/ui/PricingTable.astro';
+
+const bondPricing = [
+  {
+    option: 'B&W Text Only',
+    a4: '₱2.00',
+    short: '₱2.00',
+    long: '₱2.50',
+    details: 'Black & white bond paper printing for documents and forms',
+  },
+  {
+    option: 'Colored Text',
+    a4: '₱5.00',
+    short: '₱5.00',
+    long: '₱6.00',
+    details: 'Color text printing for flyers, handouts, and reports',
+  },
+  {
+    option: 'Light Colored Image',
+    a4: '₱7.00',
+    short: '₱6.00',
+    long: '₱8.00',
+    details: 'Light image coverage on bond paper',
+  },
+  {
+    option: 'Full-Page Colored Image',
+    a4: '₱12.00',
+    short: '₱10.00',
+    long: '₱15.00',
+    details: 'Full-color image printing on bond paper',
+  },
+];
+
+const colorPricing = [
+  { option: 'Colored Text — Short / A4', price: '₱5.00', details: 'Color text printing for presentations and documents' },
+  { option: 'Colored Text — Long', price: '₱6.00', details: 'Legal-size colored text printing' },
+];
+
+const copyPricing = [
+  { option: 'Black & white photocopy', price: '₱2.00', details: 'Fast, clear copies for documents and forms' },
+  { option: 'Color photocopy', price: '₱5.00', details: 'High-quality color photocopying' },
+  { option: 'ID / small prints', price: '₱2.00', details: 'Compact copies for IDs and small documents' },
+];
+
+const scanPricing = [
+  { option: 'Document scanning', price: '₱5.00', details: 'High-resolution scanning to PDF or image files' },
+  { option: 'USB / email delivery', price: '₱5.00', details: 'Files delivered on USB or emailed after scanning' },
+];
+
+const editPricing = [
+  { option: 'Document Editing', price: '₱20+', details: 'Document layout, formatting, and print-ready adjustments' },
+  { option: 'Rush fee', price: '₱10–₱30', details: 'Priority handling for urgent orders' },
+];
+
+const extraPricing = [
+  { option: 'Softcopy printing assistance', price: '₱10–₱20', details: 'Help preparing digital files for printing' },
+  { option: 'Bulk order inquiry', price: 'Varies', details: 'Ask us about discounts for larger print jobs' },
+];
+---
+
+<BaseLayout
+  title="Document Services"
+  description="Professional document printing, photocopying, scanning, colored printing, and layout services. Fast and affordable."
+>
+  <section class="section-padding bg-surface-50">
+    <div class="container-content mx-auto">
+      <SectionHeading
+        title="Document Services"
+        subtitle="Quality bond paper printing, copies, scans, and editing services with clear pricing and mobile-friendly ordering."
+        centered
+      />
+      <p class="mx-auto max-w-2xl text-center text-gray-600">
+        Choose the right document service for school, business, or personal needs. Each option includes quick turnaround and support from our local print team.
+      </p>
+    </div>
+  </section>
+
+  <section class="section-padding">
+    <div class="container-content mx-auto space-y-16">
+      <div class="lg:grid lg:grid-cols-[1.05fr_0.95fr] lg:items-start lg:gap-14">
+        <div>
+          <SectionHeading title="Bond Paper Printing" subtitle="Affordable black-and-white bond paper printing for documents, forms, and handouts." level={3} />
+          <p class="text-gray-600">
+            We print crisp black-and-white documents on quality bond paper. Choose A4, short, or long size and get copies ready in minutes.
+          </p>
+        </div>
+      </div>
+
+      <div class="lg:col-span-full">
+        <div class="overflow-x-auto rounded-3xl border border-gray-200 bg-white shadow-sm">
+          <table class="min-w-[760px] w-full divide-y divide-gray-200 text-left text-sm">
+            <thead class="bg-gray-50 text-gray-700">
+              <tr>
+                <th scope="col" class="px-4 py-3 font-semibold">Option</th>
+                <th scope="col" class="px-4 py-3 font-semibold">A4</th>
+                <th scope="col" class="px-4 py-3 font-semibold">Short</th>
+                <th scope="col" class="px-4 py-3 font-semibold">Long</th>
+                <th scope="col" class="px-4 py-3 font-semibold">Details</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-100 bg-white text-gray-600">
+              {bondPricing.map((row) => (
+                <tr>
+                  <td class="whitespace-nowrap px-4 py-4 font-medium text-gray-900">{row.option}</td>
+                  <td class="whitespace-nowrap px-4 py-4">{row.a4}</td>
+                  <td class="whitespace-nowrap px-4 py-4">{row.short}</td>
+                  <td class="whitespace-nowrap px-4 py-4">{row.long}</td>
+                  <td class="px-4 py-4">{row.details}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="lg:grid lg:grid-cols-[1.05fr_0.95fr] lg:items-start lg:gap-14">
+        <div>
+          <SectionHeading title="Colored Printing" subtitle="Vibrant color prints for flyers, presentations, reports, and marketing materials." level={3} />
+          <p class="text-gray-600">
+            Printed in full color on bond paper, with single-sided and double-sided options available for business documents and school projects.
+          </p>
+        </div>
+      </div>
+
+      <div class="lg:col-span-full">
+        <PricingTable rows={colorPricing} />
+      </div>
+
+      <div class="lg:grid lg:grid-cols-[1.05fr_0.95fr] lg:items-start lg:gap-14">
+        <div>
+          <SectionHeading title="Photocopy" subtitle="Fast, accurate photocopying for documents, certificates, and ID cards." level={3} />
+          <p class="text-gray-600">
+            Need copies right away? Our photocopy service delivers clean, reliable results at budget-friendly prices.
+          </p>
+        </div>
+      </div>
+
+      <div class="lg:col-span-full">
+        <PricingTable rows={copyPricing} />
+      </div>
+
+      <div class="lg:grid lg:grid-cols-[1.05fr_0.95fr] lg:items-start lg:gap-14">
+        <div>
+          <SectionHeading title="Scanning" subtitle="Scan documents to PDF or image files with fast delivery to USB or email." level={3} />
+          <p class="text-gray-600">
+            Convert your paperwork to digital files quickly. Choose PDF or image scanning and receive your files in the format you need.
+          </p>
+        </div>
+      </div>
+
+      <div class="lg:col-span-full">
+        <PricingTable rows={scanPricing} />
+      </div>
+
+      <div class="lg:grid lg:grid-cols-[1.05fr_0.95fr] lg:items-start lg:gap-14">
+        <div>
+          <SectionHeading title="Editing Services" subtitle="Document editing and rush support to make your files print-ready." level={3} />
+          <p class="text-gray-600">
+            Get help with document layout, formatting, and urgent order support so your prints look polished and professional.
+          </p>
+        </div>
+      </div>
+
+      <div class="lg:col-span-full">
+        <PricingTable rows={editPricing} />
+      </div>
+
+      <div class="lg:col-span-full">
+        <div class="rounded-[2rem] border border-gray-200 bg-white p-8 shadow-sm">
+          <SectionHeading title="Additional Document Services" subtitle="Extra support, design help, and rush options for your print order." level={3} />
+          <PricingTable rows={extraPricing} />
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section-padding bg-surface-50">
+    <div class="container-content mx-auto">
+      <Card hover padding="lg" class="border-brand-100 bg-white">
+        <div class="grid gap-6 lg:grid-cols-[1fr_auto] lg:items-center">
+          <div>
+            <h2 class="heading-md">Ready to print or scan your documents?</h2>
+            <p class="mt-3 text-base text-gray-600">
+              Visit us in store or contact us now to confirm your requirements and get a fast quote.
+            </p>
+          </div>
+          <div class="flex flex-col gap-3 sm:flex-row sm:justify-end">
+            <a href="/contact/" class="btn btn-primary btn-lg">
+              Contact us
+            </a>
+            <a href="/photo-printing/" class="btn btn-outline btn-lg">
+              Photo services
+            </a>
+          </div>
+        </div>
+      </Card>
+    </div>
+  </section>
+
+  <ContactCTA
+    title="Need help with documents?"
+    subtitle="Call or message us and we’ll help you choose the best printing service for your order."
+  />
+</BaseLayout>

@@ -1,0 +1,242 @@
+---
+/**
+ * Photo Printing page — /photo-printing/
+ */
+import BaseLayout from '../layouts/BaseLayout.astro';
+import SectionHeading from '../components/ui/SectionHeading.astro';
+import PackageCard from '../components/photo/PackageCard.astro';
+import ContactCTA from '../components/contact/ContactCTA.astro';
+import PricingTable from '../components/ui/PricingTable.astro';
+import { photoPackages } from '../data/photoPackages';
+
+const categories = [
+  { id: 'all', label: 'All Packages' },
+  { id: 'Basic ID Packages', label: 'Basic ID Packages' },
+  { id: 'Mixed ID Packages', label: 'Mixed ID Packages' },
+  { id: 'Single Prints', label: 'Single Prints' },
+  { id: 'Mini Photo Bundles', label: 'Mini Photo Bundles' },
+  { id: 'Standard Photo Bundles', label: 'Standard Photo Bundles' },
+  { id: 'Creative Bundles', label: 'Creative Bundles' },
+];
+
+const categoryGroups = categories
+  .filter((category) => category.id !== 'all')
+  .map((category) => ({
+    ...category,
+    packages: photoPackages.filter((pkg) => pkg.category === category.id),
+  }))
+  .filter((group) => group.packages.length > 0);
+
+const photoPricing = [
+  { option: 'A4 photo', type: 'Glossy photo paper', dimension: '8.3×11.7" / 21×29.7 cm', price: '₱35–₱50', details: 'Glossy photo paper for large prints and posters' },
+  { option: 'A5 photo', type: 'Glossy photo paper', dimension: '5.8×8.3" / 14.8×21 cm', price: '₱20–₱30', details: 'Glossy photo paper for cards and small portraits' },
+  { option: '3R photo', type: 'Glossy photo paper', dimension: '3.5×5" / 8.9×12.7 cm', price: '₱15', details: 'Glossy photo print for portraits and keepsakes' },
+  { option: '4R photo', type: 'Glossy photo paper', dimension: '4×6" / 10.2×15.2 cm', price: '₱20', details: 'Glossy photo print for frames and albums' },
+  { option: '5R photo', type: 'Glossy photo paper', dimension: '5×7" / 12.7×17.8 cm', price: '₱30', details: 'Glossy photo print for gifts and displays' },
+  { option: 'A4 sticker', type: 'Glossy sticker paper', dimension: '8.3×11.7" / 21×29.7 cm', price: '₱40', details: 'Glossy sticker paper in A4 size for labels and promotional prints' },
+];
+---
+
+<BaseLayout
+  title="Photo Printing"
+  description="Print your photos in wallet, 3R, 4R, 5R, 8R, and more. ID photos, collages, and custom packages available."
+>
+  <section class="section-padding bg-surface-50">
+    <div class="container-content mx-auto">
+      <div class="mx-auto max-w-3xl text-center">
+        <SectionHeading
+          title="Photo Printing"
+          subtitle="Browse our photo catalog and choose the perfect package for keepsakes, IDs, albums, and creative prints."
+          centered
+        />
+        <p class="text-base text-gray-600">
+          Explore carefully grouped photo packages, each designed to match your printing needs with fast pickup or contact-based ordering.
+        </p>
+      </div>
+
+      <div class="mt-10 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:justify-center">
+        {categories.map((category) => (
+          <button
+            type="button"
+            data-photo-filter={category.id}
+            class="inline-flex whitespace-nowrap rounded-full border border-gray-200 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition hover:border-brand-300 hover:text-brand-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500"
+            aria-pressed={category.id === 'all' ? 'true' : 'false'}
+          >
+            {category.label}
+          </button>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="section-padding">
+    <div class="container-content mx-auto space-y-16">
+      {categoryGroups.map((group) => (
+        <section
+          class="photo-category-section"
+          data-photo-category={group.id}
+        >
+          <div class="mb-8 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <h2 class="font-display text-3xl font-bold text-gray-900">{group.label}</h2>
+              <p class="mt-2 max-w-2xl text-gray-600">
+                {group.packages.length} package{group.packages.length === 1 ? '' : 's'} available in this category.
+              </p>
+            </div>
+          </div>
+
+          <div class="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+            {group.packages.map((pkg) => (
+              <PackageCard package={pkg} />
+            ))}
+          </div>
+        </section>
+      ))}
+    </div>
+  </section>
+
+  <section class="section-padding bg-surface-50">
+    <div class="container-content mx-auto">
+      <div class="grid gap-6 lg:grid-cols-[1.15fr_0.85fr] lg:items-start lg:gap-14">
+        <div>
+          <SectionHeading
+            title="Photo Paper Printing"
+            subtitle="Glossy photo paper in the most common sizes for albums, frames, and display prints."
+          />
+          <p class="text-gray-600">
+            Choose from our available glossy photo paper sizes for crisp, vibrant prints in A4, A5, 5R, 4R, and 3R.
+          </p>
+        </div>
+      </div>
+
+      <div class="mt-10">
+        <PricingTable rows={photoPricing} />
+      </div>
+    </div>
+  </section>
+
+  <!-- Package Modal -->
+  <div id="package-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
+    <div class="relative max-h-[90vh] max-w-2xl w-full bg-white rounded-2xl overflow-hidden shadow-2xl flex flex-col">
+      <!-- Close button -->
+      <button
+        id="modal-close"
+        type="button"
+        class="absolute top-4 right-4 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-white/80 text-gray-600 transition hover:bg-white hover:text-gray-900 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500"
+        aria-label="Close modal"
+      >
+        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+
+      <!-- Image container -->
+      <div class="flex-1 overflow-auto bg-surface-100 flex items-center justify-center min-h-0">
+        <img
+          id="modal-image"
+          src=""
+          alt=""
+          class="max-w-full max-h-[60vh] object-contain"
+        />
+      </div>
+
+      <!-- Package info footer -->
+      <div class="border-t border-gray-200 bg-white p-6">
+        <h3 id="modal-title" class="font-display text-xl font-bold text-gray-900"></h3>
+        <p id="modal-description" class="mt-2 text-gray-600"></p>
+      </div>
+    </div>
+  </div>
+
+  <ContactCTA
+    title="Need help choosing a photo package?"
+    subtitle="Contact us and we’ll help you pick the best print option for your photos and order size."
+    id="contact-cta"
+  />
+
+  <script type="module">
+    const filterButtons = document.querySelectorAll('[data-photo-filter]');
+    const categorySections = document.querySelectorAll('[data-photo-category]');
+    const packageCards = document.querySelectorAll('[data-package-id]');
+    const modal = document.getElementById('package-modal');
+    const modalClose = document.getElementById('modal-close');
+    const modalImage = document.getElementById('modal-image');
+    const modalTitle = document.getElementById('modal-title');
+    const modalDescription = document.getElementById('modal-description');
+
+    // Modal functions
+    const openModal = (card) => {
+      const imageSrc = card.dataset.packageImage;
+      const imageAlt = card.dataset.packageAlt;
+      const name = card.dataset.packageName;
+      const description = card.querySelector('.body-sm')?.textContent || '';
+
+      modalImage.src = imageSrc;
+      modalImage.alt = imageAlt;
+      modalTitle.textContent = name;
+      modalDescription.textContent = description;
+      modal.classList.remove('hidden');
+      document.body.style.overflow = 'hidden';
+    };
+
+    const closeModal = () => {
+      modal.classList.add('hidden');
+      document.body.style.overflow = 'auto';
+    };
+
+    // Package card click handlers
+    packageCards.forEach((card) => {
+      card.addEventListener('click', (e) => {
+        if (e.button === 0) {
+          openModal(card);
+        }
+      });
+    });
+
+    // Modal close handlers
+    modalClose.addEventListener('click', closeModal);
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) closeModal();
+    });
+
+    // Keyboard close
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && !modal.classList.contains('hidden')) {
+        closeModal();
+      }
+    });
+
+    // Filter functionality
+    const setActiveButton = (selectedId) => {
+      filterButtons.forEach((button) => {
+        const isActive = button.dataset.photoFilter === selectedId;
+        button.setAttribute('aria-pressed', String(isActive));
+        button.classList.toggle('border-brand-500', isActive);
+        button.classList.toggle('bg-brand-50', isActive);
+        button.classList.toggle('text-brand-700', isActive);
+        button.classList.toggle('border-gray-200', !isActive);
+        button.classList.toggle('bg-white', !isActive);
+      });
+    };
+
+    const applyFilter = (filterId) => {
+      categorySections.forEach((section) => {
+        const isVisible = filterId === 'all' || section.dataset.photoCategory === filterId;
+        section.style.display = isVisible ? '' : 'none';
+      });
+    };
+
+    filterButtons.forEach((button) => {
+      button.addEventListener('click', () => {
+        const filterId = button.dataset.photoFilter;
+        if (!filterId) return;
+        setActiveButton(filterId);
+        applyFilter(filterId);
+      });
+    });
+
+    // Initialize
+    setActiveButton('all');
+    applyFilter('all');
+  </script>
+</BaseLayout>

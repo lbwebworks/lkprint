@@ -1,0 +1,216 @@
+---
+/**
+ * Home page — /
+ */
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Hero from '../components/home/Hero.astro';
+import SectionHeading from '../components/ui/SectionHeading.astro';
+import ServiceCard from '../components/services/ServiceCard.astro';
+import PackageGrid from '../components/photo/PackageGrid.astro';
+import ContactCTA from '../components/contact/ContactCTA.astro';
+import Card from '../components/ui/Card.astro';
+import { services } from '../data/services';
+import { featuredPackages } from '../data/photoPackages';
+import { siteConfig } from '../data/siteConfig';
+
+const featuredServices = services.filter((service) =>
+  ['document-printing', 'photo-printing', 'lamination'].includes(service.id)
+);
+
+const customerNotes = [
+  {
+    quote: 'LK Print delivered sharp, professional-quality documents in just a few minutes. Their prices are honest and the team was friendly.',
+    author: 'Alicia M., business owner',
+  },
+  {
+    quote: 'I always get my school IDs and photo prints here. Fast service, great colors, and the staff helps me choose the right paper.',
+    author: 'Jason R., student',
+  },
+  {
+    quote: 'The lamination service made my thesis look polished. Highly recommended for anyone who needs a clean finish.',
+    author: 'Nico P., graduate',
+  },
+];
+
+const homeHighlights = [
+  {
+    title: 'Document Printing',
+    details: 'Black & white, color, and full-page printing in Short, A4, and Long sizes.',
+    href: '/document-services/',
+  },
+  {
+    title: 'Photo Printing',
+    details: 'Easy photo packages and R-series prints with glossy, matte, and premium finishes.',
+    href: '/photo-printing/',
+  },
+  {
+    title: 'Lamination',
+    details: 'Protect documents and photos with glossy or matte lamination and rush finishing.',
+    href: '/lamination-finishing/',
+  },
+];
+---
+
+<BaseLayout
+  title="Quality printing, fast service"
+  description="Discover LK Print’s document printing, photo printing, lamination, and fast contact options for local customers."
+>
+  <Hero
+    headline="Fast, affordable printing
+for every need"
+    subheadline="From school requirements to business documents and photo keepsakes — LK Print makes every order easy, affordable, and ready when you need it."
+    primaryCta={{ label: 'Explore Services', href: '/document-services/' }}
+  />
+
+  <section class="section-padding bg-surface-50">
+    <div class="container-content mx-auto">
+      <SectionHeading
+        title="Our Services"
+        subtitle="Top printing solutions for students, businesses, and everyday needs."
+        centered
+      />
+
+      <div class="grid gap-6 lg:grid-cols-3">
+        {featuredServices.map((service) => (
+          <ServiceCard key={service.id} service={service} />
+        ))}
+      </div>
+
+      <div class="mt-10 text-center">
+        <a href="/document-services/" class="btn btn-primary btn-lg">
+          See all services
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section class="section-padding bg-white">
+    <div class="container-content mx-auto">
+      <SectionHeading
+        title="Service highlights"
+        subtitle="Explore our core printing, photo, and lamination services without pricing clutter on the homepage."
+        centered
+      />
+
+      <div class="mt-10 grid gap-6 md:grid-cols-2 xl:grid-cols-4">
+        {homeHighlights.map((item) => (
+          <article class="rounded-[2rem] border border-gray-200 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-md">
+            <p class="text-sm font-semibold uppercase tracking-[0.3em] text-brand-700">{item.title}</p>
+            <p class="mt-4 text-sm leading-6 text-gray-600">{item.details}</p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="section-padding">
+    <div class="container-content mx-auto lg:grid lg:grid-cols-[1.1fr_0.9fr] lg:items-center lg:gap-16">
+      <div>
+        <SectionHeading
+          title="Why choose LK Print"
+          subtitle="Reliable local printing with fast turnaround, clear prices, and friendly service."
+        />
+
+        <div class="grid gap-5 sm:grid-cols-2">
+          <Card hover padding="lg" class="border-brand-100 bg-white">
+            <div class="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-brand-50 text-brand-700">
+              <svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3-.895 3-2-1.343-2-3-2z" />
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 12c-3.314 0-6 2.239-6 5v1h12v-1c0-2.761-2.686-5-6-5z" />
+              </svg>
+            </div>
+            <h3 class="text-lg font-semibold text-gray-900">Same-day service</h3>
+            <p class="mt-2 text-sm text-gray-600">Need prints quickly? Walk in or place an order and get fast, dependable turnaround.</p>
+          </Card>
+
+          <Card hover padding="lg" class="border-brand-100 bg-white">
+            <div class="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-brand-50 text-brand-700">
+              <svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+              </svg>
+            </div>
+            <h3 class="text-lg font-semibold text-gray-900">Trusted quality</h3>
+            <p class="mt-2 text-sm text-gray-600">Sharp, clear prints and professional finishes for documents, photos, and presentation materials.</p>
+          </Card>
+
+          <Card hover padding="lg" class="border-brand-100 bg-white">
+            <div class="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-brand-50 text-brand-700">
+              <svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.103 0-2 .897-2 2 0 1.104.897 2 2 2s2-.896 2-2c0-1.103-.897-2-2-2z" />
+                <path stroke-linecap="round" stroke-linejoin="round" d="M7.75 13.5a5.25 5.25 0 0110.5 0c0 2.621-2.129 4.75-4.75 4.75S7.75 16.121 7.75 13.5z" />
+              </svg>
+            </div>
+            <h3 class="text-lg font-semibold text-gray-900">Clear pricing</h3>
+            <p class="mt-2 text-sm text-gray-600">Prices shown up-front so you can choose the right service without surprises.</p>
+          </Card>
+
+          <Card hover padding="lg" class="border-brand-100 bg-white">
+            <div class="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-brand-50 text-brand-700">
+              <svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M17 8h2a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2v-8a2 2 0 012-2h2" />
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 12a4 4 0 100-8 4 4 0 000 8z" />
+              </svg>
+            </div>
+            <h3 class="text-lg font-semibold text-gray-900">Friendly local support</h3>
+            <p class="mt-2 text-sm text-gray-600">Our team helps you choose the best print options for your budget and deadline.</p>
+          </Card>
+        </div>
+      </div>
+
+      <div class="mt-10 lg:mt-0">
+        <div class="rounded-[2rem] border border-gray-200 bg-gradient-to-br from-brand-50 via-white to-surface-50 p-8 shadow-lg">
+          <p class="text-sm uppercase tracking-[0.3em] text-brand-700">Local print shop</p>
+          <h3 class="mt-4 text-3xl font-bold text-gray-900">Serving our neighborhood with fast, reliable prints.</h3>
+          <p class="mt-4 text-base leading-7 text-gray-600">Whether you need a single photo, a batch of documents, or lamination, we make the process simple — and we’re ready to help when you arrive.</p>
+          <div class="mt-6 space-y-3 text-sm text-gray-500">
+            <p><strong class="text-gray-900">Open:</strong> {siteConfig.businessHours[0].day} – {siteConfig.businessHours[0].hours}</p>
+            <p><strong class="text-gray-900">Call:</strong> <a href={`tel:${siteConfig.phone.replace(/\s/g, '')}`} class="text-brand-700 hover:text-brand-800">{siteConfig.phone}</a></p>
+            <p><strong class="text-gray-900">Email:</strong> <a href={`mailto:${siteConfig.email}`} class="text-brand-700 hover:text-brand-800">{siteConfig.email}</a></p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section-padding bg-surface-50">
+    <div class="container-content mx-auto">
+      <SectionHeading
+        title="Featured Photo Packages"
+        subtitle="Popular photo print packages ready for quick pickup or delivery."
+        centered
+      />
+
+      <PackageGrid packages={featuredPackages} columns={3} eagerCount={3} />
+
+      <div class="mt-10 text-center">
+        <a href="/photo-printing/" class="btn btn-outline btn-lg">
+          Browse photo printing
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section class="section-padding">
+    <div class="container-content mx-auto">
+      <SectionHeading
+        title="Customer Notes"
+        subtitle="Real feedback from customers who trust us with their printing needs."
+        centered
+      />
+
+      <div class="grid gap-6 md:grid-cols-3">
+        {customerNotes.map((note) => (
+          <Card hover padding="lg" class="bg-white">
+            <p class="text-base leading-8 text-gray-700">“{note.quote}”</p>
+            <p class="mt-6 text-sm font-semibold text-brand-700">{note.author}</p>
+          </Card>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <ContactCTA
+    title="Ready to print with LK Print?"
+    subtitle="Call, message, or visit us today and we’ll help you finish your order quickly."
+  />
+</BaseLayout>
