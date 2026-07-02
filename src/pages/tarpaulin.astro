@@ -1,0 +1,608 @@
+---
+/**
+ * Tarpaulin page — /tarpaulin/
+ */
+import BaseLayout from '../layouts/BaseLayout.astro';
+import SectionHeading from '../components/ui/SectionHeading.astro';
+import { siteConfig } from '../data/siteConfig';
+import { photoPackages } from '../data/photoPackages';
+
+const base = (import.meta.env.BASE_URL || '/').replace(/\/$/, '');
+
+const services = [
+  { label: 'Photo Printing', icon: 'camera' },
+  { label: 'Document Printing', icon: 'printer' },
+  { label: 'ID Pictures', icon: 'id' },
+  { label: 'Photocopy', icon: 'copy' },
+  { label: 'Photo Enhancement', icon: 'spark' },
+  { label: 'Scanning', icon: 'scan' },
+  { label: 'Background Removal', icon: 'cut' },
+  { label: 'Lamination', icon: 'shield' },
+];
+
+const packageSelections = [
+  { category: 'Basic ID Packages', id: 'id-package-10' },
+  { category: 'Mixed ID Packages', id: 'id-package-05' },
+  { category: 'Single Prints', id: 'solo-4r' },
+  { category: 'Mini Photo Bundles', id: 'a6-combo-2' },
+  { category: 'Standard Photo Bundles', id: 'combo-01' },
+  { category: 'Creative Bundles', id: 'crazy-combo-2' },
+];
+
+const packageHighlights = packageSelections
+  .map((selection) => {
+    const match = photoPackages.find((pkg) => pkg.id === selection.id);
+
+    if (!match) return undefined;
+
+    return {
+      category: selection.category,
+      name: match.name,
+      description: match.description,
+      price: match.price ? `PHP ${match.price.toFixed(2)}` : 'Price on request',
+      imageUrl: `${base}${match.imagePreview.startsWith('/') ? match.imagePreview : `/${match.imagePreview}`}`,
+    };
+  })
+  .filter((item): item is {
+    category: string;
+    name: string;
+    description: string;
+    price: string;
+    imageUrl: string;
+  } => Boolean(item));
+
+const samplePrints = packageHighlights.slice(0, 3);
+
+const assetPlaceholders = [
+  'Facebook Page QR code',
+  'Messenger QR code',
+  'Website QR code',
+  'Transparent business logo file',
+];
+
+const designData = {
+  businessName: siteConfig.businessName,
+  title: siteConfig.tagline,
+  phrase: siteConfig.primaryMarketingMessage,
+  welcomePhrase: siteConfig.welcomePhrase,
+  serviceArea: siteConfig.serviceArea,
+  services,
+  packages: packageHighlights,
+  samplePrints,
+  phone: siteConfig.phone,
+  email: siteConfig.email,
+  address: siteConfig.address,
+  facebookUrl: siteConfig.facebookUrl,
+  messengerUrl: siteConfig.messengerUrl,
+  websiteUrl: siteConfig.websiteUrl,
+};
+---
+
+<BaseLayout
+  title="Tarpaulin Design Preview"
+  description="Preview a sample tarpaulin layout for LK Print with services, package highlights, and contact callouts."
+>
+  <section class="section-padding bg-surface-50">
+    <div class="container-content mx-auto">
+      <div class="mx-auto max-w-4xl text-center">
+        <SectionHeading
+          title="Tarpaulin Design Preview"
+          subtitle="A first-pass canvas mockup for a storefront tarpaulin. The QR areas are placeholders for the assets you can provide later."
+          centered
+        />
+        <p class="text-base text-gray-600">
+          The layout uses three main rows: a branded top banner, a services and packages middle band, and a contact-focused footer with QR placeholders.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section-padding">
+    <div class="container-content mx-auto">
+      <div class="card overflow-hidden border-gray-200 bg-white p-4 shadow-sm sm:p-6">
+        <div class="rounded-[1.75rem] bg-gradient-to-br from-brand-950 via-brand-900 to-brand-800 p-3 sm:p-4">
+          <canvas
+            id="tarpaulin-canvas"
+            width="1600"
+            height="1000"
+            class="block w-full rounded-[1.25rem] bg-white h-auto"
+            aria-label="Canvas preview of the LK Print tarpaulin design"
+          ></canvas>
+        </div>
+        <p class="mt-4 text-sm text-gray-500">
+          Package images are pulled from the existing photo package assets. QR codes and any custom logo file are intentionally shown as gray placeholders for now.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section-padding bg-surface-50">
+    <div class="container-content mx-auto">
+      <SectionHeading
+        title="Assets Still Needed"
+        subtitle="These can replace the gray placeholders in the bottom row and top accent areas once you provide them."
+      />
+
+      <div class="grid gap-6 sm:grid-cols-2 xl:grid-cols-4">
+        {assetPlaceholders.map((item) => (
+          <div class="card flex min-h-44 flex-col justify-between border-gray-200 bg-white p-5">
+            <div class="rounded-2xl bg-gray-200/80 min-h-24 w-full border border-dashed border-gray-300"></div>
+            <div class="mt-4">
+              <p class="text-sm font-semibold text-gray-900">{item}</p>
+              <p class="mt-1 text-sm text-gray-500">Placeholder only. Replace with the final image asset when ready.</p>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <script id="tarpaulin-design-data" type="application/json" set:html={JSON.stringify(designData)}></script>
+
+  <script type="module">
+    const designDataElement = document.getElementById('tarpaulin-design-data');
+    const canvas = document.getElementById('tarpaulin-canvas');
+
+    if (!(designDataElement instanceof HTMLScriptElement) || !(canvas instanceof HTMLCanvasElement)) {
+      throw new Error('Tarpaulin design data or canvas element is missing.');
+    }
+
+    const designData = JSON.parse(designDataElement.textContent || '{}');
+    const context = canvas.getContext('2d');
+    const imageCache = new Map();
+    const designWidth = 1600;
+    const designHeight = 1000;
+
+    if (!context) {
+      throw new Error('Unable to acquire canvas rendering context.');
+    }
+
+    const brandBlue = '#0e6fca';
+    const brandBlueDark = '#0a2d54';
+    const brandBlueDeep = '#061a33';
+    const accentGold = '#d4a017';
+    const surfaceBlue = '#f5f9ff';
+    const borderColor = '#d0e3f5';
+    const textStrong = '#0f172a';
+    const textBody = '#475569';
+    const textMuted = '#64748b';
+
+    const iconDrawers = {
+      camera: (ctx, x, y, size) => {
+        ctx.strokeStyle = brandBlueDark;
+        ctx.lineWidth = 2.5;
+        ctx.beginPath();
+        ctx.roundRect(x + 8, y + 16, size - 16, size - 28, 10);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.arc(x + size / 2, y + size / 2 + 4, 10, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(x + 18, y + 18);
+        ctx.lineTo(x + 28, y + 10);
+        ctx.lineTo(x + 42, y + 10);
+        ctx.stroke();
+      },
+      printer: (ctx, x, y, size) => {
+        ctx.strokeStyle = brandBlueDark;
+        ctx.lineWidth = 2.5;
+        ctx.beginPath();
+        ctx.roundRect(x + 10, y + 18, size - 20, size - 28, 10);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.rect(x + 18, y + 8, size - 36, 18);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.rect(x + 18, y + 34, size - 36, 18);
+        ctx.stroke();
+      },
+      id: (ctx, x, y, size) => {
+        ctx.strokeStyle = brandBlueDark;
+        ctx.lineWidth = 2.5;
+        ctx.beginPath();
+        ctx.roundRect(x + 8, y + 12, size - 16, size - 24, 10);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.arc(x + 24, y + 30, 7, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(x + 18, y + 48);
+        ctx.quadraticCurveTo(x + 24, y + 40, x + 30, y + 48);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(x + 40, y + 28);
+        ctx.lineTo(x + size - 16, y + 28);
+        ctx.moveTo(x + 40, y + 40);
+        ctx.lineTo(x + size - 24, y + 40);
+        ctx.stroke();
+      },
+      copy: (ctx, x, y, size) => {
+        ctx.strokeStyle = brandBlueDark;
+        ctx.lineWidth = 2.5;
+        ctx.beginPath();
+        ctx.roundRect(x + 18, y + 12, size - 28, size - 28, 8);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.roundRect(x + 8, y + 22, size - 28, size - 28, 8);
+        ctx.stroke();
+      },
+      spark: (ctx, x, y, size) => {
+        ctx.strokeStyle = brandBlueDark;
+        ctx.lineWidth = 2.5;
+        ctx.beginPath();
+        ctx.moveTo(x + size / 2, y + 10);
+        ctx.lineTo(x + size / 2, y + size - 10);
+        ctx.moveTo(x + 10, y + size / 2);
+        ctx.lineTo(x + size - 10, y + size / 2);
+        ctx.moveTo(x + 18, y + 18);
+        ctx.lineTo(x + size - 18, y + size - 18);
+        ctx.moveTo(x + size - 18, y + 18);
+        ctx.lineTo(x + 18, y + size - 18);
+        ctx.stroke();
+      },
+      scan: (ctx, x, y, size) => {
+        ctx.strokeStyle = brandBlueDark;
+        ctx.lineWidth = 2.5;
+        ctx.beginPath();
+        ctx.roundRect(x + 10, y + 16, size - 20, size - 30, 10);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(x + 16, y + size / 2);
+        ctx.lineTo(x + size - 16, y + size / 2);
+        ctx.moveTo(x + 20, y + 20);
+        ctx.lineTo(x + 20, y + 10);
+        ctx.moveTo(x + size - 20, y + 20);
+        ctx.lineTo(x + size - 20, y + 10);
+        ctx.stroke();
+      },
+      cut: (ctx, x, y, size) => {
+        ctx.strokeStyle = brandBlueDark;
+        ctx.lineWidth = 2.5;
+        ctx.beginPath();
+        ctx.arc(x + 20, y + 22, 7, 0, Math.PI * 2);
+        ctx.arc(x + 20, y + 42, 7, 0, Math.PI * 2);
+        ctx.moveTo(x + 26, y + 24);
+        ctx.lineTo(x + size - 14, y + 12);
+        ctx.moveTo(x + 26, y + 40);
+        ctx.lineTo(x + size - 14, y + size - 12);
+        ctx.stroke();
+      },
+      shield: (ctx, x, y, size) => {
+        ctx.strokeStyle = brandBlueDark;
+        ctx.lineWidth = 2.5;
+        ctx.beginPath();
+        ctx.moveTo(x + size / 2, y + 10);
+        ctx.lineTo(x + size - 14, y + 18);
+        ctx.lineTo(x + size - 18, y + 38);
+        ctx.quadraticCurveTo(x + size / 2, y + size - 8, x + 18, y + 38);
+        ctx.lineTo(x + 14, y + 18);
+        ctx.closePath();
+        ctx.stroke();
+      },
+    };
+
+    function roundRectPath(ctx, x, y, width, height, radius) {
+      ctx.beginPath();
+      ctx.roundRect(x, y, width, height, radius);
+    }
+
+    function fillRoundRect(ctx, x, y, width, height, radius, fillStyle) {
+      roundRectPath(ctx, x, y, width, height, radius);
+      ctx.fillStyle = fillStyle;
+      ctx.fill();
+    }
+
+    function strokeRoundRect(ctx, x, y, width, height, radius, strokeStyle, lineWidth = 1) {
+      roundRectPath(ctx, x, y, width, height, radius);
+      ctx.strokeStyle = strokeStyle;
+      ctx.lineWidth = lineWidth;
+      ctx.stroke();
+    }
+
+    function fitText(ctx, text, maxWidth, initialSize, minSize, weight = '700') {
+      let fontSize = initialSize;
+      while (fontSize > minSize) {
+        ctx.font = `${weight} ${fontSize}px Inter, sans-serif`;
+        if (ctx.measureText(text).width <= maxWidth) return fontSize;
+        fontSize -= 2;
+      }
+      return minSize;
+    }
+
+    function wrapText(ctx, text, maxWidth, maxLines = 3) {
+      const words = text.split(' ');
+      const lines = [];
+      let currentLine = '';
+
+      for (const word of words) {
+        const trial = currentLine ? `${currentLine} ${word}` : word;
+        if (ctx.measureText(trial).width <= maxWidth) {
+          currentLine = trial;
+          continue;
+        }
+
+        if (currentLine) lines.push(currentLine);
+        currentLine = word;
+
+        if (lines.length === maxLines - 1) break;
+      }
+
+      if (currentLine && lines.length < maxLines) {
+        lines.push(currentLine);
+      }
+
+      if (lines.length === maxLines && words.join(' ') !== lines.join(' ')) {
+        let lastLine = lines[maxLines - 1];
+        while (ctx.measureText(`${lastLine}...`).width > maxWidth && lastLine.length > 0) {
+          lastLine = lastLine.slice(0, -1).trim();
+        }
+        lines[maxLines - 1] = `${lastLine}...`;
+      }
+
+      return lines;
+    }
+
+    function loadImage(source) {
+      if (!source) return Promise.resolve(null);
+      if (imageCache.has(source)) return imageCache.get(source);
+
+      const promise = new Promise((resolve) => {
+        const image = new Image();
+        image.onload = () => resolve(image);
+        image.onerror = () => resolve(null);
+        image.src = source;
+      });
+
+      imageCache.set(source, promise);
+      return promise;
+    }
+
+    function drawPlaceholderImage(ctx, x, y, width, height, label) {
+      fillRoundRect(ctx, x, y, width, height, 16, '#d1d5db');
+      strokeRoundRect(ctx, x, y, width, height, 16, '#94a3b8', 1.5);
+      ctx.fillStyle = '#475569';
+      ctx.font = '600 16px Inter, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText(label, x + width / 2, y + height / 2 + 6);
+      ctx.textAlign = 'left';
+    }
+
+    function drawImageCover(ctx, image, x, y, width, height, radius) {
+      roundRectPath(ctx, x, y, width, height, radius);
+      ctx.save();
+      ctx.clip();
+
+      if (image) {
+        const scale = Math.max(width / image.width, height / image.height);
+        const drawWidth = image.width * scale;
+        const drawHeight = image.height * scale;
+        const offsetX = x + (width - drawWidth) / 2;
+        const offsetY = y + (height - drawHeight) / 2;
+        ctx.drawImage(image, offsetX, offsetY, drawWidth, drawHeight);
+      } else {
+        const fallback = ctx.createLinearGradient(x, y, x + width, y + height);
+        fallback.addColorStop(0, '#dbeafe');
+        fallback.addColorStop(1, '#bfdbfe');
+        ctx.fillStyle = fallback;
+        ctx.fillRect(x, y, width, height);
+      }
+
+      ctx.restore();
+    }
+
+    function drawTopSection(ctx, images) {
+      const gradient = ctx.createLinearGradient(0, 0, 1600, 240);
+      gradient.addColorStop(0, '#0e6fca');
+      gradient.addColorStop(0.55, '#1a8de8');
+      gradient.addColorStop(1, '#0a2d54');
+
+      fillRoundRect(ctx, 32, 32, 1536, 240, 28, gradient);
+
+      ctx.fillStyle = 'rgba(255,255,255,0.12)';
+      ctx.beginPath();
+      ctx.arc(1380, 70, 110, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.arc(1490, 220, 140, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.fillStyle = '#dbeafe';
+      ctx.font = '700 20px Inter, sans-serif';
+      ctx.fillText('TARPAULIN DESIGN PREVIEW', 72, 84);
+
+      const titleSize = fitText(ctx, designData.businessName, 760, 78, 56, '800');
+      ctx.fillStyle = '#ffffff';
+      ctx.font = `800 ${titleSize}px Libre Baskerville, Georgia, serif`;
+      ctx.fillText(designData.businessName, 72, 156);
+
+      ctx.font = '600 26px Inter, sans-serif';
+      ctx.fillStyle = '#f8fafc';
+      const phraseLines = wrapText(ctx, designData.title, 760, 2);
+      phraseLines.forEach((line, index) => {
+        ctx.fillText(line, 72, 196 + index * 32);
+      });
+
+      const chips = ['Fast Turnaround', 'Sharp Prints', 'Custom Layouts'];
+      let chipX = 72;
+      chips.forEach((chip) => {
+        const width = ctx.measureText(chip).width + 34;
+        fillRoundRect(ctx, chipX, 220, width, 34, 17, 'rgba(255,255,255,0.16)');
+        ctx.fillStyle = '#ffffff';
+        ctx.font = '600 16px Inter, sans-serif';
+        ctx.fillText(chip, chipX + 17, 242);
+        chipX += width + 12;
+      });
+
+      const printWidth = 150;
+      const printHeight = 106;
+      const printY = 94;
+      const startX = 1050;
+
+      images.forEach((image, index) => {
+        const x = startX + index * 154;
+        ctx.save();
+        ctx.translate(x + printWidth / 2, printY + printHeight / 2);
+        ctx.rotate((-8 + index * 8) * Math.PI / 180);
+        fillRoundRect(ctx, -printWidth / 2, -printHeight / 2, printWidth, printHeight, 16, '#ffffff');
+        drawImageCover(ctx, image, -printWidth / 2 + 8, -printHeight / 2 + 8, printWidth - 16, printHeight - 16, 10);
+        ctx.restore();
+      });
+    }
+
+    function drawServiceList(ctx) {
+      fillRoundRect(ctx, 32, 296, 520, 482, 28, '#ffffff');
+      strokeRoundRect(ctx, 32, 296, 520, 482, 28, borderColor, 2);
+
+      ctx.fillStyle = textStrong;
+      ctx.font = '800 34px Libre Baskerville, Georgia, serif';
+      ctx.fillText('Services', 72, 352);
+
+      ctx.font = '500 18px Inter, sans-serif';
+      ctx.fillStyle = textMuted;
+      ctx.fillText('Core print and finishing services available in-store.', 72, 382);
+
+      designData.services.forEach((service, index) => {
+        const column = index % 2;
+        const row = Math.floor(index / 2);
+        const itemX = 72 + column * 220;
+        const itemY = 424 + row * 82;
+
+        fillRoundRect(ctx, itemX, itemY, 188, 62, 20, surfaceBlue);
+        strokeRoundRect(ctx, itemX, itemY, 188, 62, 20, '#dbeafe', 1.5);
+        fillRoundRect(ctx, itemX + 10, itemY + 9, 44, 44, 16, '#dbeafe');
+        const drawIcon = iconDrawers[service.icon];
+        if (drawIcon) drawIcon(ctx, itemX + 4, itemY + 2, 56);
+
+        ctx.fillStyle = textStrong;
+        ctx.font = '700 16px Inter, sans-serif';
+        const lines = wrapText(ctx, service.label, 118, 2);
+        lines.forEach((line, lineIndex) => {
+          ctx.fillText(line, itemX + 66, itemY + 28 + lineIndex * 17);
+        });
+      });
+    }
+
+    function drawPackageGrid(ctx, images) {
+      fillRoundRect(ctx, 576, 296, 992, 482, 28, '#ffffff');
+      strokeRoundRect(ctx, 576, 296, 992, 482, 28, borderColor, 2);
+
+      ctx.fillStyle = textStrong;
+      ctx.font = '800 34px Libre Baskerville, Georgia, serif';
+      ctx.fillText('Photo Printing Packages', 616, 352);
+
+      ctx.font = '500 18px Inter, sans-serif';
+      ctx.fillStyle = textMuted;
+      ctx.fillText('One sample card for each package category.', 616, 382);
+
+      const cardWidth = 450;
+      const cardHeight = 114;
+      const startX = 616;
+      const startY = 418;
+      const columnGap = 24;
+      const rowGap = 18;
+
+      designData.packages.forEach((pkg, index) => {
+        const column = index % 2;
+        const row = Math.floor(index / 2);
+        const x = startX + column * (cardWidth + columnGap);
+        const y = startY + row * (cardHeight + rowGap);
+        const image = images[index] || null;
+
+        fillRoundRect(ctx, x, y, cardWidth, cardHeight, 22, '#f8fbff');
+        strokeRoundRect(ctx, x, y, cardWidth, cardHeight, 22, '#dbeafe', 1.5);
+
+        ctx.fillStyle = brandBlue;
+        ctx.font = '700 13px Inter, sans-serif';
+        ctx.fillText(pkg.category.toUpperCase(), x + 22, y + 24);
+
+        ctx.fillStyle = textStrong;
+        ctx.font = '700 22px Inter, sans-serif';
+        ctx.fillText(pkg.name, x + 22, y + 52);
+
+        drawImageCover(ctx, image, x + 22, y + 64, 106, 36, 10);
+        if (!image) drawPlaceholderImage(ctx, x + 22, y + 64, 106, 36, 'Image');
+
+        ctx.fillStyle = textBody;
+        ctx.font = '500 14px Inter, sans-serif';
+        const textLines = wrapText(ctx, pkg.description, 215, 2);
+        textLines.forEach((line, lineIndex) => {
+          ctx.fillText(line, x + 144, y + 83 + lineIndex * 16);
+        });
+
+        ctx.fillStyle = accentGold;
+        ctx.font = '800 20px Inter, sans-serif';
+        ctx.textAlign = 'right';
+        ctx.fillText(pkg.price, x + cardWidth - 22, y + 90);
+        ctx.textAlign = 'left';
+      });
+    }
+
+    function drawBottomSection(ctx) {
+      const gradient = ctx.createLinearGradient(32, 802, 1568, 968);
+      gradient.addColorStop(0, brandBlueDark);
+      gradient.addColorStop(1, brandBlueDeep);
+      fillRoundRect(ctx, 32, 802, 1536, 166, 28, gradient);
+
+      ctx.fillStyle = '#ffffff';
+      ctx.font = '800 30px Libre Baskerville, Georgia, serif';
+      ctx.fillText('Print smarter. Promote better. Stay memorable.', 72, 854);
+
+      ctx.font = '500 18px Inter, sans-serif';
+      ctx.fillStyle = '#dbeafe';
+      const copyLines = wrapText(ctx, designData.phrase, 760, 2);
+      copyLines.forEach((line, index) => {
+        ctx.fillText(line, 72, 888 + index * 24);
+      });
+
+      ctx.fillStyle = '#ffffff';
+      ctx.font = '600 16px Inter, sans-serif';
+      ctx.fillText(`Phone: ${designData.phone}`, 72, 936);
+      ctx.fillText(`Email: ${designData.email}`, 360, 936);
+      ctx.fillText(`Website: ${designData.websiteUrl.replace(/^https?:\/\//, '')}`, 760, 936);
+
+      const qrLabels = ['FB Page QR', 'Messenger QR', 'Website QR'];
+      qrLabels.forEach((label, index) => {
+        const x = 1080 + index * 150;
+        const y = 836;
+        fillRoundRect(ctx, x, y, 118, 118, 18, '#d1d5db');
+        strokeRoundRect(ctx, x, y, 118, 118, 18, '#94a3b8', 1.5);
+        ctx.fillStyle = '#475569';
+        ctx.font = '700 14px Inter, sans-serif';
+        const lines = wrapText(ctx, label, 80, 2);
+        ctx.textAlign = 'center';
+        lines.forEach((line, lineIndex) => {
+          ctx.fillText(line, x + 59, y + 52 + lineIndex * 16);
+        });
+        ctx.textAlign = 'left';
+      });
+    }
+
+    async function renderCanvas() {
+      const sampleImages = await Promise.all(
+        designData.samplePrints.map((item) => loadImage(item.imageUrl))
+      );
+      const packageImages = await Promise.all(
+        designData.packages.map((item) => loadImage(item.imageUrl))
+      );
+
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      canvas.width = designWidth * dpr;
+      canvas.height = designHeight * dpr;
+      canvas.style.width = '100%';
+      canvas.style.height = 'auto';
+      context.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+      context.clearRect(0, 0, designWidth, designHeight);
+      fillRoundRect(context, 0, 0, designWidth, designHeight, 0, '#ffffff');
+      fillRoundRect(context, 16, 16, designWidth - 32, designHeight - 32, 32, '#eef6ff');
+
+      drawTopSection(context, sampleImages);
+      drawServiceList(context);
+      drawPackageGrid(context, packageImages);
+      drawBottomSection(context);
+    }
+
+    renderCanvas();
+    window.addEventListener('resize', renderCanvas);
+  </script>
+</BaseLayout>

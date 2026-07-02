@@ -20,15 +20,11 @@
  *   />
  */
 import { siteConfig } from '../../data/siteConfig';
+import type { StatItem } from '../../types';
 
 interface CtaLink {
   label: string;
   href: string;
-}
-
-interface Stat {
-  value: string;
-  label: string;
 }
 
 interface Props {
@@ -37,25 +33,21 @@ interface Props {
   primaryCta?: CtaLink;
   secondaryCta?: CtaLink;
   showStats?: boolean;
-  stats?: Stat[];
+  stats?: StatItem[];
 }
 
 const {
   headline    = `Fast & Affordable\nPrinting Services`,
-  subheadline = 'Documents, photos, lamination, and more — ready when you need them. Serving students and businesses in our community.',
+  subheadline = siteConfig.welcomePhrase,
   primaryCta  = undefined,
   secondaryCta = undefined,
   showStats   = false,
-  stats = [
-    { value: '₱2', label: 'B&W printing' },
-    { value: 'Reliable', label: 'Same-day service' },
-    { value: '9+', label: 'Services available' },
-    { value: '6 days', label: 'Open weekly' },
-  ],
+  stats = siteConfig.heroStats,
 } = Astro.props;
 
 // Split headline on \n for multi-line rendering
 const headlineLines = headline.split('\n');
+const backgroundGridPattern = `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`;
 ---
 
 <section
@@ -66,7 +58,7 @@ const headlineLines = headline.split('\n');
   <div
     class="absolute inset-0 opacity-[0.04]"
     aria-hidden="true"
-    style="background-image: url(\"data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E\")"
+    style={`background-image: ${backgroundGridPattern}`}
   />
 
   <!-- Radial glow -->

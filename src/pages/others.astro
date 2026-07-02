@@ -6,6 +6,8 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import SectionHeading from '../components/ui/SectionHeading.astro';
 import PricingTable from '../components/ui/PricingTable.astro';
 
+const base = (import.meta.env.BASE_URL || '/').replace(/\/$/, '');
+
 const othersPricing = [
   { option: 'Scanning',                  price: '₱5',  details: 'High-resolution scanning to PDF or image files' },
   { option: 'Document Editing / Layout', price: '₱20', details: 'Document layout, formatting, and print-ready adjustments' },
@@ -31,6 +33,11 @@ const othersPricing = [
         <p class="text-base text-gray-600">
           From scanning and editing to rush orders and photo enhancements — we've got you covered.
         </p>
+        <div class="mt-8">
+          <a href={`${base}/tarpaulin/`} class="btn btn-primary btn-lg">
+            View Tarpaulin
+          </a>
+        </div>
       </div>
     </div>
   </section>

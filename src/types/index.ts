@@ -10,18 +10,30 @@ export interface BusinessHours {
   hours: string;
 }
 
+export interface StatItem {
+  value: string;
+  label: string;
+}
+
 export interface SiteConfig {
   businessName: string;
   tagline: string;
+  websiteUrl: string;
   phone: string;
   email: string;
   address: string;
+  serviceArea: string;
+  welcomePhrase: string;
+  primaryMarketingMessage: string;
+  mission: string;
+  vision: string;
   googleMapsUrl: string;
   googleMapsEmbedUrl: string;
   facebookUrl?: string;
   messengerUrl?: string;
   whatsappUrl?: string;
   businessHours: BusinessHours[];
+  heroStats: StatItem[];
   navLinks: NavLink[];
 }
 
