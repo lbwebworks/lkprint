@@ -19,8 +19,7 @@ export const siteConfig: SiteConfig = {
   whatsappUrl: undefined,
   businessHours: [
     { day: 'Monday – Friday', hours: '8:00 AM – 6:00 PM' },
-    { day: 'Saturday',        hours: '8:00 AM – 5:00 PM' },
-    { day: 'Sunday',          hours: 'Closed' },
+    { day: 'Saturday and Sunday', hours: '8:00 AM – 5:00 PM' },
   ],
   heroStats: [
     { value: '₱2', label: 'B&W printing' },

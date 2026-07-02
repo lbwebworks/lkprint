@@ -100,6 +100,85 @@ const designData = {
   <section class="section-padding">
     <div class="container-content mx-auto">
       <div class="card overflow-hidden border-gray-200 bg-white p-4 shadow-sm sm:p-6">
+        <div class="mb-6 rounded-[1.5rem] border border-surface-200 bg-surface-50 p-4 sm:p-5">
+          <div class="grid gap-4 lg:grid-cols-[1.2fr_1.2fr_1fr_auto] lg:items-end">
+            <label class="block">
+              <span class="mb-2 block text-sm font-semibold text-gray-900">Tarpaulin width</span>
+              <input
+                id="tarpaulin-width"
+                type="number"
+                min="1"
+                step="0.1"
+                value="6"
+                class="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-base text-gray-900 shadow-sm focus:border-brand-400 focus:outline-none"
+              />
+            </label>
+
+            <label class="block">
+              <span class="mb-2 block text-sm font-semibold text-gray-900">Tarpaulin height</span>
+              <input
+                id="tarpaulin-height"
+                type="number"
+                min="1"
+                step="0.1"
+                value="4"
+                class="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-base text-gray-900 shadow-sm focus:border-brand-400 focus:outline-none"
+              />
+            </label>
+
+            <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-1">
+              <label class="block">
+                <span class="mb-2 block text-sm font-semibold text-gray-900">Measurement unit</span>
+                <select
+                  id="tarpaulin-unit"
+                  class="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-base text-gray-900 shadow-sm focus:border-brand-400 focus:outline-none"
+                >
+                  <option value="ft" selected>Feet</option>
+                  <option value="in">Inches</option>
+                  <option value="cm">Centimeters</option>
+                  <option value="m">Meters</option>
+                </select>
+              </label>
+
+              <label class="block">
+                <span class="mb-2 block text-sm font-semibold text-gray-900">Export quality</span>
+                <select
+                  id="tarpaulin-ppi"
+                  class="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-base text-gray-900 shadow-sm focus:border-brand-400 focus:outline-none"
+                >
+                  <option value="72">72 PPI</option>
+                  <option value="100" selected>100 PPI</option>
+                  <option value="150">150 PPI</option>
+                </select>
+              </label>
+            </div>
+
+            <div class="flex flex-col gap-3">
+              <button id="tarpaulin-export" type="button" class="btn btn-primary btn-lg w-full">
+                Export PNG
+              </button>
+              <p class="text-xs text-gray-500">
+                Preview auto-fits the chosen aspect ratio. Export uses the selected print resolution.
+              </p>
+            </div>
+          </div>
+
+          <div class="mt-4 grid gap-3 rounded-2xl bg-white p-4 shadow-sm sm:grid-cols-3">
+            <div>
+              <p class="text-xs font-semibold uppercase tracking-wide text-gray-400">Current size</p>
+              <p id="tarpaulin-size-summary" class="mt-1 text-sm font-semibold text-gray-900">6 ft × 4 ft</p>
+            </div>
+            <div>
+              <p class="text-xs font-semibold uppercase tracking-wide text-gray-400">Aspect ratio</p>
+              <p id="tarpaulin-ratio-summary" class="mt-1 text-sm font-semibold text-gray-900">3:2 landscape</p>
+            </div>
+            <div>
+              <p class="text-xs font-semibold uppercase tracking-wide text-gray-400">Export pixels</p>
+              <p id="tarpaulin-pixel-summary" class="mt-1 text-sm font-semibold text-gray-900">7200 × 4800 px at 100 PPI</p>
+            </div>
+          </div>
+        </div>
+
         <div class="rounded-[1.75rem] bg-gradient-to-br from-brand-950 via-brand-900 to-brand-800 p-3 sm:p-4">
           <canvas
             id="tarpaulin-canvas"
@@ -142,16 +221,43 @@ const designData = {
   <script type="module">
     const designDataElement = document.getElementById('tarpaulin-design-data');
     const canvas = document.getElementById('tarpaulin-canvas');
+    const widthInput = document.getElementById('tarpaulin-width');
+    const heightInput = document.getElementById('tarpaulin-height');
+    const unitSelect = document.getElementById('tarpaulin-unit');
+    const ppiSelect = document.getElementById('tarpaulin-ppi');
+    const exportButton = document.getElementById('tarpaulin-export');
+    const sizeSummary = document.getElementById('tarpaulin-size-summary');
+    const ratioSummary = document.getElementById('tarpaulin-ratio-summary');
+    const pixelSummary = document.getElementById('tarpaulin-pixel-summary');
 
-    if (!(designDataElement instanceof HTMLScriptElement) || !(canvas instanceof HTMLCanvasElement)) {
-      throw new Error('Tarpaulin design data or canvas element is missing.');
+    if (
+      !(designDataElement instanceof HTMLScriptElement) ||
+      !(canvas instanceof HTMLCanvasElement) ||
+      !(widthInput instanceof HTMLInputElement) ||
+      !(heightInput instanceof HTMLInputElement) ||
+      !(unitSelect instanceof HTMLSelectElement) ||
+      !(ppiSelect instanceof HTMLSelectElement) ||
+      !(exportButton instanceof HTMLButtonElement) ||
+      !(sizeSummary instanceof HTMLElement) ||
+      !(ratioSummary instanceof HTMLElement) ||
+      !(pixelSummary instanceof HTMLElement)
+    ) {
+      throw new Error('Tarpaulin page controls are missing.');
     }
 
     const designData = JSON.parse(designDataElement.textContent || '{}');
     const context = canvas.getContext('2d');
     const imageCache = new Map();
-    const designWidth = 1600;
-    const designHeight = 1000;
+    const baseDesignWidth = 1600;
+    const baseDesignHeight = 1000;
+    const maxPreviewEdge = 1800;
+    const maxExportPixels = 40000000;
+    const unitToInches = {
+      in: 1,
+      ft: 12,
+      cm: 1 / 2.54,
+      m: 39.37007874,
+    };
 
     if (!context) {
       throw new Error('Unable to acquire canvas rendering context.');
@@ -166,6 +272,8 @@ const designData = {
     const textStrong = '#0f172a';
     const textBody = '#475569';
     const textMuted = '#64748b';
+    let assetsPromise;
+    let renderSequence = 0;
 
     const iconDrawers = {
       camera: (ctx, x, y, size) => {
@@ -577,31 +685,163 @@ const designData = {
       });
     }
 
-    async function renderCanvas() {
-      const sampleImages = await Promise.all(
-        designData.samplePrints.map((item) => loadImage(item.imageUrl))
-      );
-      const packageImages = await Promise.all(
-        designData.packages.map((item) => loadImage(item.imageUrl))
-      );
+    function getDimensionState() {
+      const widthValue = Number(widthInput.value);
+      const heightValue = Number(heightInput.value);
+      const unit = unitSelect.value in unitToInches ? unitSelect.value : 'ft';
+      const ppi = Number(ppiSelect.value) || 100;
+      const safeWidth = Number.isFinite(widthValue) && widthValue > 0 ? widthValue : 6;
+      const safeHeight = Number.isFinite(heightValue) && heightValue > 0 ? heightValue : 4;
 
-      const dpr = Math.min(window.devicePixelRatio || 1, 2);
-      canvas.width = designWidth * dpr;
-      canvas.height = designHeight * dpr;
-      canvas.style.width = '100%';
-      canvas.style.height = 'auto';
-      context.setTransform(dpr, 0, 0, dpr, 0, 0);
-
-      context.clearRect(0, 0, designWidth, designHeight);
-      fillRoundRect(context, 0, 0, designWidth, designHeight, 0, '#ffffff');
-      fillRoundRect(context, 16, 16, designWidth - 32, designHeight - 32, 32, '#eef6ff');
-
-      drawTopSection(context, sampleImages);
-      drawServiceList(context);
-      drawPackageGrid(context, packageImages);
-      drawBottomSection(context);
+      return {
+        width: safeWidth,
+        height: safeHeight,
+        unit,
+        ppi,
+      };
     }
 
+    function formatUnitLabel(unit) {
+      return {
+        ft: 'ft',
+        in: 'in',
+        cm: 'cm',
+        m: 'm',
+      }[unit] || unit;
+    }
+
+    function computePixelDimensions(state) {
+      const inchesPerUnit = unitToInches[state.unit] || unitToInches.ft;
+      return {
+        widthPixels: Math.max(1, Math.round(state.width * inchesPerUnit * state.ppi)),
+        heightPixels: Math.max(1, Math.round(state.height * inchesPerUnit * state.ppi)),
+      };
+    }
+
+    function updateSummaries() {
+      const state = getDimensionState();
+      const { widthPixels, heightPixels } = computePixelDimensions(state);
+      const aspectRatio = state.width / state.height;
+      const orientation = aspectRatio >= 1 ? 'landscape' : 'portrait';
+
+      sizeSummary.textContent = `${state.width} ${formatUnitLabel(state.unit)} × ${state.height} ${formatUnitLabel(state.unit)}`;
+      ratioSummary.textContent = `${state.width}:${state.height} ${orientation}`;
+      pixelSummary.textContent = `${widthPixels.toLocaleString()} × ${heightPixels.toLocaleString()} px at ${state.ppi} PPI`;
+    }
+
+    async function getLoadedAssets() {
+      if (!assetsPromise) {
+        assetsPromise = Promise.all([
+          Promise.all(designData.samplePrints.map((item) => loadImage(item.imageUrl))),
+          Promise.all(designData.packages.map((item) => loadImage(item.imageUrl))),
+        ]).then(([sampleImages, packageImages]) => ({ sampleImages, packageImages }));
+      }
+
+      return assetsPromise;
+    }
+
+    function renderDesign(targetContext, targetWidth, targetHeight, assets) {
+      const scaleX = targetWidth / baseDesignWidth;
+      const scaleY = targetHeight / baseDesignHeight;
+
+      targetContext.setTransform(1, 0, 0, 1, 0, 0);
+      targetContext.clearRect(0, 0, targetWidth, targetHeight);
+      targetContext.setTransform(scaleX, 0, 0, scaleY, 0, 0);
+
+      fillRoundRect(targetContext, 0, 0, baseDesignWidth, baseDesignHeight, 0, '#ffffff');
+      fillRoundRect(targetContext, 16, 16, baseDesignWidth - 32, baseDesignHeight - 32, 32, '#eef6ff');
+
+      drawTopSection(targetContext, assets.sampleImages);
+      drawServiceList(targetContext);
+      drawPackageGrid(targetContext, assets.packageImages);
+      drawBottomSection(targetContext);
+    }
+
+    async function renderCanvas() {
+      const renderId = ++renderSequence;
+      const state = getDimensionState();
+      const previewAspect = state.width / state.height;
+      const previewWidth = previewAspect >= 1 ? maxPreviewEdge : Math.round(maxPreviewEdge * previewAspect);
+      const previewHeight = previewAspect >= 1 ? Math.round(maxPreviewEdge / previewAspect) : maxPreviewEdge;
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      const assets = await getLoadedAssets();
+
+      if (renderId !== renderSequence) return;
+
+      canvas.width = Math.max(1, Math.round(previewWidth * dpr));
+      canvas.height = Math.max(1, Math.round(previewHeight * dpr));
+      canvas.style.width = '100%';
+      canvas.style.height = 'auto';
+
+      context.setTransform(dpr, 0, 0, dpr, 0, 0);
+      renderDesign(context, previewWidth, previewHeight, assets);
+      updateSummaries();
+    }
+
+    async function exportCanvas() {
+      const state = getDimensionState();
+      const { widthPixels, heightPixels } = computePixelDimensions(state);
+      const totalPixels = widthPixels * heightPixels;
+
+      if (totalPixels > maxExportPixels) {
+        window.alert('The selected export is too large for a reliable browser-generated PNG. Reduce the size or choose a lower PPI.');
+        return;
+      }
+
+      exportButton.disabled = true;
+      exportButton.textContent = 'Exporting...';
+
+      try {
+        const assets = await getLoadedAssets();
+        const exportCanvas = document.createElement('canvas');
+        exportCanvas.width = widthPixels;
+        exportCanvas.height = heightPixels;
+        const exportContext = exportCanvas.getContext('2d');
+
+        if (!exportContext) {
+          throw new Error('Unable to create export canvas context.');
+        }
+
+        renderDesign(exportContext, widthPixels, heightPixels, assets);
+
+        const blob = await new Promise((resolve) => exportCanvas.toBlob(resolve, 'image/png'));
+        if (!blob) {
+          throw new Error('PNG export failed.');
+        }
+
+        const fileName = `lkprint-tarpaulin-${state.width}x${state.height}-${state.unit}-${state.ppi}ppi.png`;
+        const downloadUrl = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = downloadUrl;
+        link.download = fileName;
+        link.click();
+        URL.revokeObjectURL(downloadUrl);
+      } catch (error) {
+        console.error(error);
+        window.alert('Unable to export the tarpaulin image. Try a smaller size or lower PPI.');
+      } finally {
+        exportButton.disabled = false;
+        exportButton.textContent = 'Export PNG';
+      }
+    }
+
+    [widthInput, heightInput].forEach((input) => {
+      input.addEventListener('input', () => {
+        updateSummaries();
+        renderCanvas();
+      });
+    });
+
+    [unitSelect, ppiSelect].forEach((input) => {
+      input.addEventListener('change', () => {
+        updateSummaries();
+        renderCanvas();
+      });
+    });
+
+    exportButton.addEventListener('click', exportCanvas);
+
+    updateSummaries();
     renderCanvas();
     window.addEventListener('resize', renderCanvas);
   </script>
