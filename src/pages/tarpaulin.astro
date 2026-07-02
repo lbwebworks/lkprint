@@ -775,12 +775,12 @@ const designData = {
         const leftColX = bodyX;
         const rightColX = leftColX + leftColW + colGapInner;
 
-        fillRoundRect(ctx, leftColX, bodyY + metrics.y(4), leftColW, metrics.y(32), metrics.radius(8), accentColor);
+        fillRoundRect(ctx, leftColX, bodyY + metrics.y(8), leftColW, metrics.y(32), metrics.radius(8), accentColor);
         ctx.fillStyle = '#ffffff';
         ctx.font = `900 ${metrics.font(14)}px Inter, sans-serif`;
         const nameLines = wrapText(ctx, pkg.name.toUpperCase(), leftColW - metrics.x(8), 2);
         nameLines.forEach((line, lineIndex) => {
-          ctx.fillText(line, leftColX + metrics.x(6), bodyY + metrics.y(17) + lineIndex * metrics.y(14));
+          ctx.fillText(line, leftColX + metrics.x(8), bodyY + metrics.y(30) + lineIndex * metrics.y(14));
         });
 
         ctx.fillStyle = '#334155';
