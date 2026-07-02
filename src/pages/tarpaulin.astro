@@ -21,11 +21,11 @@ const services = [
 ];
 
 const packageSelections = [
-  { category: 'Basic ID Packages', id: 'id-package-10' },
+  { category: 'Basic ID Packages', id: 'id-package-08' },
   { category: 'Mixed ID Packages', id: 'id-package-05' },
-  { category: 'Single Prints', id: 'solo-4r' },
-  { category: 'Mini Photo Bundles', id: 'a6-combo-2' },
-  { category: 'Standard Photo Bundles', id: 'combo-01' },
+  { category: 'Single Prints', id: 'solo-a4' },
+  { category: 'Mini Photo Bundles', id: '3r-combo' },
+  { category: 'Standard Photo Bundles', id: 'combo-05' },
   { category: 'Creative Bundles', id: 'crazy-combo-2' },
 ];
 
@@ -52,16 +52,14 @@ const packageHighlights = packageSelections
   } => Boolean(item));
 
 const middlePackageIds = new Set(packageSelections.map((item) => item.id));
-const sampleCategories = [...new Set(packageSelections.map((item) => item.category))];
-const topSampleSelections = sampleCategories
-  .map((category) => {
-    return (
-      photoPackages.find((pkg) => pkg.category === category && !middlePackageIds.has(pkg.id)) ||
-      photoPackages.find((pkg) => pkg.category === category)
-    );
-  })
-  .filter((item): item is (typeof photoPackages)[number] => Boolean(item))
-  .map((pkg) => pkg.id);
+const topSampleSelections = [
+  'id-package-10', // 2x2 Standard Pack
+  'id-package-04', // Passport Combo Pack
+  'solo-4r', // Single 4R Print
+  'a6-combo-1', // A6 Duo Pack
+  'combo-06', // 2R Saver Pack
+  'crazy-combo-4', // Family ID Combo Pack
+];
 
 const samplePrints = topSampleSelections
   .map((id) => photoPackages.find((pkg) => pkg.id === id))
@@ -745,78 +743,81 @@ const designData = {
       ctx.fillText('PHOTO PRINTING PACKAGES', rightX + metrics.x(34), rightY + metrics.y(35));
 
       const cardColors = ['#0d4fa6', '#2e9f3f', '#0891b2', '#6b329e', '#ea7a00', '#e11d24'];
-      const cardX = rightX + metrics.x(24);
-      const cardY = rightY + metrics.y(72);
-      const cardWidth = metrics.x(312);
-      const cardHeight = metrics.y(220);
-      const colGap = metrics.x(14);
-      const rowGap = metrics.y(20);
+      const gridX = rightX + metrics.x(24);
+      const gridY = rightY + metrics.y(72);
+      const gridW = rightWidth - metrics.x(48);
+      const gridH = rightHeight - metrics.y(96);
+      const cols = 2;
+      const rows = 3;
+      const colGap = metrics.x(16);
+      const rowGap = metrics.y(14);
+      const cardWidth = (gridW - colGap * (cols - 1)) / cols;
+      const cardHeight = (gridH - rowGap * (rows - 1)) / rows;
 
       designData.packages.slice(0, 6).forEach((pkg, index) => {
-        const col = index % 3;
-        const row = Math.floor(index / 3);
-        const x = cardX + col * (cardWidth + colGap);
-        const y = cardY + row * (cardHeight + rowGap);
-        const frameColor = '#0a2d54';
+        const col = index % cols;
+        const row = Math.floor(index / cols);
+        const x = gridX + col * (cardWidth + colGap);
+        const y = gridY + row * (cardHeight + rowGap);
         const accentColor = cardColors[index % cardColors.length];
         const image = images[index] || null;
 
-        fillRoundRect(ctx, x, y, cardWidth, cardHeight, metrics.radius(20), frameColor);
-        fillRoundRect(ctx, x + metrics.x(8), y + metrics.y(8), cardWidth - metrics.x(16), cardHeight - metrics.y(16), metrics.radius(15), '#ffffff');
+        fillRoundRect(ctx, x, y, cardWidth, cardHeight, metrics.radius(16), '#ffffff');
+        strokeRoundRect(ctx, x, y, cardWidth, cardHeight, metrics.radius(16), '#0a2d54', metrics.line(1.6));
 
-        fillRoundRect(ctx, x + metrics.x(10), y + metrics.y(10), cardWidth - metrics.x(20), metrics.y(34), metrics.radius(10), accentColor);
+        const bodyX = x + metrics.x(10);
+        const bodyY = y + metrics.y(10);
+        const bodyW = cardWidth - metrics.x(20);
+        const bodyH = cardHeight - metrics.y(20);
+        const colGapInner = metrics.x(10);
+        const leftColW = bodyW * 0.56;
+        const rightColW = bodyW - leftColW - colGapInner;
+        const leftColX = bodyX;
+        const rightColX = leftColX + leftColW + colGapInner;
+
+        fillRoundRect(ctx, leftColX, bodyY + metrics.y(4), leftColW, metrics.y(32), metrics.radius(8), accentColor);
         ctx.fillStyle = '#ffffff';
-        ctx.font = `900 ${metrics.font(18)}px Inter, sans-serif`;
-        ctx.textAlign = 'center';
-        const cardTitle = wrapText(ctx, pkg.name.toUpperCase(), cardWidth - metrics.x(36), 1)[0] || pkg.name.toUpperCase();
-        ctx.fillText(cardTitle, x + cardWidth / 2, y + metrics.y(33));
-        ctx.textAlign = 'left';
+        ctx.font = `900 ${metrics.font(14)}px Inter, sans-serif`;
+        const nameLines = wrapText(ctx, pkg.name.toUpperCase(), leftColW - metrics.x(8), 2);
+        nameLines.forEach((line, lineIndex) => {
+          ctx.fillText(line, leftColX + metrics.x(6), bodyY + metrics.y(17) + lineIndex * metrics.y(14));
+        });
 
-        const bodyY = y + metrics.y(50);
-        const bodyH = cardHeight - metrics.y(64);
-        const imageW = metrics.x(126);
-        const imageH = bodyH - metrics.y(12);
+        ctx.fillStyle = '#334155';
+        ctx.font = `700 ${metrics.font(10)}px Inter, sans-serif`;
+        const categoryLabel = wrapText(ctx, pkg.category.toUpperCase(), leftColW - metrics.x(10), 1)[0] || pkg.category.toUpperCase();
+        ctx.fillText(categoryLabel, leftColX, bodyY + metrics.y(52));
 
+        ctx.fillStyle = '#334155';
+        ctx.font = `600 ${metrics.font(11)}px Inter, sans-serif`;
+        const descTopY = bodyY + metrics.y(72);
+        const descLines = wrapText(ctx, pkg.description, leftColW - metrics.x(8), 4);
+        descLines.forEach((line, lineIndex) => {
+          ctx.fillText(line, leftColX, descTopY + lineIndex * metrics.y(14));
+        });
+
+        const imageY = bodyY;
+        const imageH = bodyH;
         drawImageContain(
           ctx,
           image,
-          x + metrics.x(18),
-          bodyY,
-          imageW,
+          rightColX,
+          imageY,
+          rightColW,
           imageH,
-          metrics.radius(8)
+          metrics.radius(10)
         );
         if (!image) {
           drawPlaceholderImage(
             ctx,
-            x + metrics.x(18),
-            bodyY,
-            imageW,
+            rightColX,
+            imageY,
+            rightColW,
             imageH,
             'Image',
             metrics
           );
         }
-
-        const detailX = x + metrics.x(154);
-        const detailW = cardWidth - metrics.x(172);
-        const detailY = bodyY + metrics.y(8);
-        ctx.fillStyle = '#334155';
-        ctx.font = `600 ${metrics.font(14)}px Inter, sans-serif`;
-        const descLines = wrapText(ctx, pkg.description, detailW, 4);
-        descLines.forEach((line, lineIndex) => {
-          ctx.fillText(line, detailX, detailY + lineIndex * metrics.y(18));
-        });
-
-        const stripX = x + metrics.x(10);
-        const stripY = y + cardHeight - metrics.y(42);
-        const stripW = cardWidth - metrics.x(20);
-        const stripH = metrics.y(28);
-
-        fillRoundRect(ctx, stripX, stripY, stripW, stripH, metrics.radius(14), accentColor);
-        ctx.fillStyle = '#ffffff';
-        ctx.font = `600 ${metrics.font(12)}px Inter, sans-serif`;
-        ctx.fillText('Popular package', stripX + metrics.x(12), stripY + metrics.y(18));
 
         const stickerW = metrics.x(116);
         const stickerH = metrics.y(36);
@@ -970,6 +971,7 @@ const designData = {
     function updateSummaries() {
       const state = getDimensionState();
       const { widthPixels, heightPixels } = computePixelDimensions(state);
+      const totalPixels = widthPixels * heightPixels;
       const aspectRatio = state.width / state.height;
       const orientation = aspectRatio >= 1 ? 'landscape' : 'portrait';
 
@@ -979,7 +981,8 @@ const designData = {
       const normalizedHeight = Math.round(state.height * 10);
       const divisor = gcd(normalizedWidth, normalizedHeight) || 1;
       ratioSummary.textContent = `${normalizedWidth / divisor}:${normalizedHeight / divisor} ${orientation}`;
-      pixelSummary.textContent = `${widthPixels.toLocaleString()} × ${heightPixels.toLocaleString()} px at ${state.ppi} PPI`;
+      const overLimitText = totalPixels > maxExportPixels ? ' (auto-scale on export)' : '';
+      pixelSummary.textContent = `${widthPixels.toLocaleString()} × ${heightPixels.toLocaleString()} px at ${state.ppi} PPI${overLimitText}`;
     }
 
     async function getLoadedAssets() {
@@ -1034,11 +1037,10 @@ const designData = {
       const state = getDimensionState();
       const { widthPixels, heightPixels } = computePixelDimensions(state);
       const totalPixels = widthPixels * heightPixels;
-
-      if (totalPixels > maxExportPixels) {
-        window.alert('The selected export is too large for a reliable browser-generated PNG. Reduce the size or choose a lower PPI.');
-        return;
-      }
+      const scaleToSafe = totalPixels > maxExportPixels ? Math.sqrt(maxExportPixels / totalPixels) : 1;
+      const exportWidth = Math.max(1, Math.floor(widthPixels * scaleToSafe));
+      const exportHeight = Math.max(1, Math.floor(heightPixels * scaleToSafe));
+      const effectivePpi = Math.max(1, Math.round(state.ppi * scaleToSafe));
 
       exportButton.disabled = true;
       exportButton.textContent = 'Exporting...';
@@ -1046,28 +1048,34 @@ const designData = {
       try {
         const assets = await getLoadedAssets();
         const exportCanvas = document.createElement('canvas');
-        exportCanvas.width = widthPixels;
-        exportCanvas.height = heightPixels;
+        exportCanvas.width = exportWidth;
+        exportCanvas.height = exportHeight;
         const exportContext = exportCanvas.getContext('2d');
 
         if (!exportContext) {
           throw new Error('Unable to create export canvas context.');
         }
 
-        renderDesign(exportContext, widthPixels, heightPixels, assets);
+        renderDesign(exportContext, exportWidth, exportHeight, assets);
 
         const blob = await new Promise((resolve) => exportCanvas.toBlob(resolve, 'image/png'));
         if (!blob) {
           throw new Error('PNG export failed.');
         }
 
-        const fileName = `lkprint-tarpaulin-${state.width}x${state.height}-${state.unit}-${state.ppi}ppi.png`;
+        const fileName = `lkprint-tarpaulin-${state.width}x${state.height}-${state.unit}-${effectivePpi}ppi.png`;
         const downloadUrl = URL.createObjectURL(blob);
         const link = document.createElement('a');
         link.href = downloadUrl;
         link.download = fileName;
         link.click();
         URL.revokeObjectURL(downloadUrl);
+
+        if (scaleToSafe < 1) {
+          window.alert(
+            `Export scaled to a browser-safe size: ${exportWidth.toLocaleString()} x ${exportHeight.toLocaleString()} px (effective ${effectivePpi} PPI).`
+          );
+        }
       } catch (error) {
         console.error(error);
         window.alert('Unable to export the tarpaulin image. Try a smaller size or lower PPI.');
