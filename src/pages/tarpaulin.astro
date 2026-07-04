@@ -10,14 +10,14 @@ import { photoPackages } from '../data/photoPackages';
 const base = (import.meta.env.BASE_URL || '/').replace(/\/$/, '');
 
 const services = [
-  { label: 'Photo Printing', icon: 'camera' },
-  { label: 'Document Printing', icon: 'printer' },
-  { label: 'ID Pictures', icon: 'id' },
-  { label: 'Photocopy', icon: 'copy' },
-  { label: 'Photo Enhancement', icon: 'spark' },
-  { label: 'Scanning', icon: 'scan' },
-  { label: 'Background Removal', icon: 'cut' },
-  { label: 'Lamination', icon: 'shield' },
+  { label: 'Photo Printing', icon: 'camera', iconUrl: `${base}/images/icons/photo_print.png`, description: 'Print your memories in high quality', color: '#0f78d8' },
+  { label: 'Document Printing', icon: 'printer', iconUrl: `${base}/images/icons/document_print.png`, description: 'Black & white and color', color: '#0ea5a6' },
+  { label: 'Document Layout', icon: 'id', iconUrl: `${base}/images/icons/document_edit.png`, description: 'Custom layout and document design', color: '#e91e63' },
+  { label: 'Photocopy', icon: 'copy', iconUrl: `${base}/images/icons/photocopy.png`, description: 'Clear and crisp copies', color: '#4caf50' },
+  { label: 'Photo Enhancement', icon: 'spark', iconUrl: `${base}/images/icons/photo_enhancement.png`, description: 'Enhance colors and sharpness', color: '#5b2ea8' },
+  { label: 'Scanning', icon: 'scan', iconUrl: `${base}/images/icons/scan.png`, description: 'High resolution scanning', color: '#0f52ba' },
+  { label: 'Background Removal', icon: 'cut', iconUrl: `${base}/images/icons/background_removal.png`, description: 'Remove or replace background', color: '#ef4444' },
+  { label: 'Lamination', icon: 'shield', iconUrl: `${base}/images/icons/lamination.png`, description: 'Protect important documents', color: '#d97706' },
 ];
 
 const packageSelections = [
@@ -112,6 +112,8 @@ const designData = {
       </div>
     </div>
   </section>
+
+  <!-- Services are drawn onto the canvas to ensure they appear in exported tarpaulin images. -->
 
   <section class="section-padding">
     <div class="container-content mx-auto">
@@ -497,6 +499,58 @@ const designData = {
       return promise;
     }
 
+    // Convert an Image with a gray background into a transparent version and optionally recolor the
+    // remaining (non-background) pixels. Returns a Promise<Image|null>.
+    function processIconImage(image, recolor = null) {
+      if (!image) return Promise.resolve(null);
+
+      try {
+        const off = document.createElement('canvas');
+        off.width = image.width;
+        off.height = image.height;
+        const ctx = off.getContext('2d');
+        if (!ctx) return Promise.resolve(image);
+
+        ctx.drawImage(image, 0, 0);
+        const imgData = ctx.getImageData(0, 0, off.width, off.height);
+        const data = imgData.data;
+
+        // Heuristic: treat near-uniform gray-ish pixels as background and make them transparent.
+        for (let i = 0; i < data.length; i += 4) {
+          const r = data[i];
+          const g = data[i + 1];
+          const b = data[i + 2];
+
+          // If the pixel is close to gray/white (bright and channels similar), make it transparent
+          const max = Math.max(r, g, b);
+          const min = Math.min(r, g, b);
+          if (max > 200 && (max - min) < 30) {
+            data[i + 3] = 0;
+            continue;
+          }
+        }
+
+        ctx.putImageData(imgData, 0, 0);
+
+        if (recolor) {
+          // Recolor remaining (non-transparent) pixels by using source-in composite.
+          ctx.globalCompositeOperation = 'source-in';
+          ctx.fillStyle = recolor;
+          ctx.fillRect(0, 0, off.width, off.height);
+          ctx.globalCompositeOperation = 'source-over';
+        }
+
+        return new Promise((resolve) => {
+          const out = new Image();
+          out.onload = () => resolve(out);
+          out.onerror = () => resolve(null);
+          out.src = off.toDataURL('image/png');
+        });
+      } catch (e) {
+        return Promise.resolve(image);
+      }
+    }
+
     function drawPlaceholderImage(ctx, x, y, width, height, label, metrics) {
       fillRoundRect(ctx, x, y, width, height, 16, '#d1d5db');
       strokeRoundRect(ctx, x, y, width, height, metrics.radius(16), '#94a3b8', metrics.line(1.5));
@@ -652,7 +706,7 @@ const designData = {
       });
     }
 
-    function drawServiceList(ctx, metrics) {
+    function drawServiceList(ctx, metrics, serviceIcons) {
       const leftX = metrics.x(34);
       const leftY = metrics.y(264);
       const leftWidth = metrics.x(500);
@@ -671,7 +725,7 @@ const designData = {
       const serviceDescriptions = {
         'Photo Printing': 'Print your memories in high quality',
         'Document Printing': 'Black & white and color',
-        'ID Pictures': '1x1, 2x2, passport and more',
+        'Document Layout': 'Custom layout and document design',
         Photocopy: 'Clear and crisp copies',
         'Photo Enhancement': 'Enhance colors and sharpness',
         Scanning: 'High resolution scanning',
@@ -705,8 +759,18 @@ const designData = {
         ctx.arc(cardX + metrics.x(36), cardY + metrics.y(36), metrics.size(30), 0, Math.PI * 2);
         ctx.fill();
 
-        const drawIcon = iconDrawers[service.icon];
-        if (drawIcon) drawIcon(ctx, cardX + metrics.x(4), cardY + metrics.y(2), metrics.size(64));
+        // Prefer user-supplied PNG icons (preloaded in assets). Fallback to vector drawers.
+        const iconImage = (serviceIcons && serviceIcons[index]) || null;
+        const iconSize = metrics.size(36);
+        const iconX = cardX + metrics.x(36) - iconSize / 2;
+        const iconY = cardY + metrics.y(36) - iconSize / 2;
+
+        if (iconImage) {
+          drawImageContain(ctx, iconImage, iconX, iconY, iconSize, iconSize, metrics.radius(8));
+        } else {
+          const drawIcon = iconDrawers[service.icon];
+          if (drawIcon) drawIcon(ctx, cardX + metrics.x(4), cardY + metrics.y(2), metrics.size(64));
+        }
 
         ctx.fillStyle = '#111c3d';
         ctx.font = `900 ${metrics.font(24)}px Inter, sans-serif`;
@@ -990,7 +1054,15 @@ const designData = {
         assetsPromise = Promise.all([
           Promise.all(designData.samplePrints.map((item) => loadImage(item.imageUrl))),
           Promise.all(designData.packages.map((item) => loadImage(item.imageUrl))),
-        ]).then(([sampleImages, packageImages]) => ({ sampleImages, packageImages }));
+          Promise.all((designData.services || []).map((s) => loadImage(s.iconUrl))),
+        ]).then(([sampleImages, packageImages, serviceIcons]) =>
+          // process service icons to remove gray backgrounds and keep them transparent
+          Promise.all((serviceIcons || []).map((img, idx) => processIconImage(img))).then((processed) => ({
+            sampleImages,
+            packageImages,
+            serviceIcons: processed,
+          }))
+        );
       }
 
       return assetsPromise;
@@ -1006,7 +1078,7 @@ const designData = {
       fillRoundRect(targetContext, metrics.x(16), metrics.y(16), targetWidth - metrics.x(32), targetHeight - metrics.y(32), metrics.radius(32), '#eef6ff');
 
       drawTopSection(targetContext, assets.sampleImages, metrics);
-      drawServiceList(targetContext, metrics);
+      drawServiceList(targetContext, metrics, assets.serviceIcons);
       const priceStickers = drawPackageGrid(targetContext, assets.packageImages, metrics);
       drawBottomSection(targetContext, metrics);
       drawPackagePriceStickers(targetContext, priceStickers, metrics);
