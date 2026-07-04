@@ -5,7 +5,7 @@ export const siteConfig: SiteConfig = {
   tagline: 'Quality Printing, Fast & Affordable',
   websiteUrl: 'https://lbwebworks.github.io/lkprint/',
   phone: '02-8275-6737',          // ← update with real number
-  email: 'leeandkishprintingservice@gmail.com',          // ← update with real email
+  email: 'lkprint26@gmail.com',          // ← update with real email
   address: 'U4 B19 L16 Gardenia St., South Greenheights, Barangay Putatan, Muntinlupa City, Metro Manila',
   serviceArea: 'Serving students, families, and small businesses in Putatan, Muntinlupa City, and nearby communities.',
   welcomePhrase: 'Welcome to LK Print, your neighborhood print shop for everyday documents, treasured photos, and rush printing needs.',
