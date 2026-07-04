@@ -4,7 +4,7 @@ export const siteConfig: SiteConfig = {
   businessName: 'LK Print',
   tagline: 'Quality Printing, Fast & Affordable',
   websiteUrl: 'https://lbwebworks.github.io/lkprint/',
-  phone: '02-8275-6237',          // ← update with real number
+  phone: '02-8275-6737',          // ← update with real number
   email: 'leeandkishprintingservice@gmail.com',          // ← update with real email
   address: 'U4 B19 L16 Gardenia St., South Greenheights, Barangay Putatan, Muntinlupa City, Metro Manila',
   serviceArea: 'Serving students, families, and small businesses in Putatan, Muntinlupa City, and nearby communities.',
@@ -34,4 +34,12 @@ export const siteConfig: SiteConfig = {
     { label: 'Lamination',            href: '/lkprint/lamination/' },
     { label: 'Others',                 href: '/lkprint/others/' },
   ],
+  developer: {
+    email: 'lee.budaden@gmail.com',
+    // Portfolio QR (used in tarpaulin footer) and other available QR images
+    // QR used in the Website Builder promo (left-side QR in dev column)
+    qrPortfolio: '/images/qr/qr_lbwebworks.png',
+    // Order: Facebook, LK Print (business), Messenger — used in "Scan to connect"
+    qrImages: ['/images/qr/qr_facebook.png', '/images/qr/qr_lkprint.png', '/images/qr/qr_messenger.png'],
+  },
 };

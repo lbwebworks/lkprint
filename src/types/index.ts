@@ -35,6 +35,12 @@ export interface SiteConfig {
   businessHours: BusinessHours[];
   heroStats: StatItem[];
   navLinks: NavLink[];
+  /** Optional developer contact and QR assets (for promo / portfolio) */
+  developer?: {
+    email: string;
+    qrPortfolio?: string;
+    qrImages?: string[];
+  };
 }
 
 // ─── Services ────────────────────────────────────────────────────────────────

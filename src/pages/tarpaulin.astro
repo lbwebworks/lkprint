@@ -91,6 +91,7 @@ const designData = {
   facebookUrl: siteConfig.facebookUrl,
   messengerUrl: siteConfig.messengerUrl,
   websiteUrl: siteConfig.websiteUrl,
+  developer: siteConfig.developer,
 };
 ---
 
@@ -499,6 +500,42 @@ const designData = {
       return promise;
     }
 
+    function normalizeAssetPath(path) {
+      if (!path) return path;
+      if (path.startsWith('http://') || path.startsWith('https://')) return path;
+
+      // Determine base URL at runtime in the browser.
+      // 1) Prefer Vite's import.meta.env.BASE_URL when available.
+      // 2) Then prefer a <base> element if present in the document.
+      // 3) Otherwise derive a sensible base from the current location (first path segment).
+      let runtimeBase = '/';
+      try {
+        // Note: avoid referencing `import` directly in runtime code to prevent
+        // syntax errors in some browsers. Prefer a page <base> tag or the
+        // current location to derive the base path instead.
+        if (typeof document !== 'undefined') {
+          const baseEl = document.querySelector('base');
+          if (baseEl && baseEl.getAttribute('href')) {
+            // Use the pathname portion of the base href
+            try {
+              const u = new URL(baseEl.href, location.href);
+              runtimeBase = u.pathname || '/';
+            } catch (e) {
+              runtimeBase = baseEl.getAttribute('href') || '/';
+            }
+          } else if (typeof location !== 'undefined' && location.pathname) {
+            const segs = location.pathname.split('/').filter(Boolean);
+            runtimeBase = segs.length > 0 ? `/${segs[0]}` : '/';
+          }
+        }
+      } catch (e) {
+        runtimeBase = '/';
+      }
+
+      runtimeBase = (runtimeBase || '/').replace(/\/$/, '');
+      return `${runtimeBase}/${path.replace(/^\//, '')}`;
+    }
+
     // Convert an Image with a gray background into a transparent version and optionally recolor the
     // remaining (non-background) pixels. Returns a Promise<Image|null>.
     function processIconImage(image, recolor = null) {
@@ -633,7 +670,6 @@ const designData = {
 
       ctx.fillStyle = '#dbeafe';
       ctx.font = `700 ${metrics.font(20)}px Inter, sans-serif`;
-      ctx.fillText('TARPAULIN DESIGN PREVIEW', leftColX, metrics.y(84));
 
       const titleSize = fitText(
         ctx,
@@ -700,8 +736,8 @@ const designData = {
         ctx.save();
         ctx.translate(x + printWidth / 2, printY + printHeight / 2);
         ctx.rotate((-8 + index * 8) * Math.PI / 180);
-        fillRoundRect(ctx, -printWidth / 2, -printHeight / 2, printWidth, printHeight, metrics.radius(16), '#ffffff');
-        drawImageContain(ctx, image, -printWidth / 2 + metrics.x(8), -printHeight / 2 + metrics.y(8), printWidth - metrics.x(16), printHeight - metrics.y(16), metrics.radius(10));
+        // Draw the image only (no white background) to give more space — use cover so image fills the area.
+        drawImageCover(ctx, image, -printWidth / 2, -printHeight / 2, printWidth, printHeight, metrics.radius(16));
         ctx.restore();
       });
     }
@@ -717,7 +753,7 @@ const designData = {
 
       fillRoundRect(ctx, leftX + metrics.x(16), leftY - metrics.y(8), leftWidth - metrics.x(32), metrics.y(62), metrics.radius(14), '#07327f');
       ctx.fillStyle = '#ffffff';
-      ctx.font = `900 ${metrics.font(34)}px Inter, sans-serif`;
+      ctx.font = `900 ${metrics.font(28)}px Inter, sans-serif`;
       ctx.textAlign = 'center';
       ctx.fillText('OUR SERVICES', leftX + leftWidth / 2, leftY + metrics.y(33));
       ctx.textAlign = 'left';
@@ -773,7 +809,7 @@ const designData = {
         }
 
         ctx.fillStyle = '#111c3d';
-        ctx.font = `900 ${metrics.font(24)}px Inter, sans-serif`;
+        ctx.font = `900 ${metrics.font(20)}px Inter, sans-serif`;
         const titleLines = wrapText(ctx, service.label.toUpperCase(), metrics.x(140), 2);
         titleLines.forEach((line, lineIndex) => {
           ctx.fillText(line, cardX + metrics.x(84), cardY + metrics.y(28) + lineIndex * metrics.y(22));
@@ -803,7 +839,7 @@ const designData = {
 
       fillRoundRect(ctx, rightX + metrics.x(14), rightY - metrics.y(8), rightWidth - metrics.x(20), metrics.y(62), metrics.radius(14), '#ec1073');
       ctx.fillStyle = '#ffffff';
-      ctx.font = `900 ${metrics.font(38)}px Inter, sans-serif`;
+      ctx.font = `900 ${metrics.font(32)}px Inter, sans-serif`;
       ctx.fillText('PHOTO PRINTING PACKAGES', rightX + metrics.x(34), rightY + metrics.y(35));
 
       const cardColors = ['#0d4fa6', '#2e9f3f', '#0891b2', '#6b329e', '#ea7a00', '#e11d24'];
@@ -918,7 +954,7 @@ const designData = {
       });
     }
 
-    function drawBottomSection(ctx, metrics) {
+    function drawBottomSection(ctx, metrics, assets) {
       const gradient = ctx.createLinearGradient(metrics.x(32), metrics.y(806), metrics.x(1568), metrics.y(986));
       gradient.addColorStop(0, '#2f6cb3');
       gradient.addColorStop(1, '#4e88cb');
@@ -929,74 +965,124 @@ const designData = {
       const panelW = metrics.x(1488);
       const panelH = metrics.y(152);
       const colGap = metrics.x(18);
-      const leftW = panelW * 0.34;
-      const centerW = panelW * 0.3;
-      const rightW = panelW - leftW - centerW - colGap * 2;
-      const leftX = panelX;
+
+      // Inner content padding on both left and right to keep symmetry
+      const contentPadding = metrics.x(14);
+      const innerW = panelW - contentPadding * 2;
+
+      // Four-column layout inside the inner content area
+      const leftW = innerW * 0.34;
+      const centerW = innerW * 0.22;
+      const scanW = innerW * 0.22;
+      const rightW = innerW - leftW - centerW - scanW - colGap * 3;
+      const leftX = panelX + contentPadding;
       const centerX = leftX + leftW + colGap;
-      const rightX = centerX + centerW + colGap;
-
-      fillRoundRect(ctx, panelX, panelY, panelW, panelH, metrics.radius(16), 'rgba(255,255,255,0.12)');
-
+      const scanX = centerX + centerW + colGap;
+      const rightX = scanX + scanW + colGap;
       ctx.fillStyle = '#ffffff';
       ctx.font = `800 ${metrics.font(22)}px Libre Baskerville, Georgia, serif`;
-      ctx.fillText('Print smarter. Promote better.', leftX + metrics.x(14), panelY + metrics.y(34));
-      ctx.fillText('Stay memorable.', leftX + metrics.x(14), panelY + metrics.y(60));
+      ctx.fillText('Print smarter. Promote better.', leftX, panelY + metrics.y(34));
+      ctx.fillText('Stay memorable.', leftX, panelY + metrics.y(60));
 
       ctx.fillStyle = '#e6f2ff';
       ctx.font = `500 ${metrics.font(13)}px Inter, sans-serif`;
       const promoLines = wrapText(ctx, designData.phrase, leftW - metrics.x(28), 4);
       promoLines.forEach((line, index) => {
-        ctx.fillText(line, leftX + metrics.x(14), panelY + metrics.y(86) + index * metrics.y(16));
+        ctx.fillText(line, leftX, panelY + metrics.y(86) + index * metrics.y(16));
       });
 
-      fillRoundRect(ctx, centerX, panelY + metrics.y(10), centerW, panelH - metrics.y(20), metrics.radius(14), 'rgba(255,255,255,0.16)');
+      // Center: contact details
+      // Use unified heading/body fonts across Contact, Scan, and Website Builder columns
+      const colHeadingFont = `700 ${metrics.font(13)}px Inter, sans-serif`;
+      const colBodyFont = `600 ${metrics.font(11)}px Inter, sans-serif`;
+
       ctx.fillStyle = '#ffffff';
-      ctx.font = `700 ${metrics.font(14)}px Inter, sans-serif`;
-      ctx.fillText('CONTACT DETAILS', centerX + metrics.x(14), panelY + metrics.y(30));
+      ctx.font = colHeadingFont;
+      ctx.fillText('CONTACT DETAILS', centerX, panelY + metrics.y(30));
 
       const contactList = [
         `- Phone: ${designData.phone}`,
         `- Email: ${designData.email}`,
         `- Website: ${designData.websiteUrl.replace(/^https?:\/\//, '')}`,
-        `- Facebook: ${designData.facebookUrl.replace(/^https?:\/\//, '')}`,
-        `- Messenger: ${designData.messengerUrl.replace(/^https?:\/\//, '')}`,
+        `- Facebook: ${designData.facebookUrl ? designData.facebookUrl.replace(/^https?:\/\//, '') : ''}`,
+        `- Messenger: ${designData.messengerUrl ? designData.messengerUrl.replace(/^https?:\/\//, '') : ''}`,
       ];
 
       ctx.fillStyle = '#e8f3ff';
-      ctx.font = `600 ${metrics.font(11)}px Inter, sans-serif`;
+      ctx.font = colBodyFont;
       contactList.forEach((item, index) => {
-        ctx.fillText(item, centerX + metrics.x(14), panelY + metrics.y(50) + index * metrics.y(18));
+        ctx.fillText(item, centerX, panelY + metrics.y(50) + index * metrics.y(18));
       });
 
-      const qrLabels = ['FB PAGE', 'MESSENGER', 'WEBSITE'];
-      const qrGap = metrics.x(12);
-      const qrSize = metrics.size(90);
-      const qrBlockW = qrSize;
-      const totalQrW = qrBlockW * 3 + qrGap * 2;
-      const qrStartX = rightX + Math.max(0, (rightW - totalQrW) / 2);
-
-      fillRoundRect(ctx, rightX, panelY + metrics.y(10), rightW, panelH - metrics.y(20), metrics.radius(14), 'rgba(255,255,255,0.16)');
+      // Scan to connect area (uses developer QR images if available)
       ctx.fillStyle = '#ffffff';
-      ctx.font = `700 ${metrics.font(13)}px Inter, sans-serif`;
-      ctx.fillText('SCAN TO CONNECT', rightX + metrics.x(14), panelY + metrics.y(30));
+      ctx.font = colHeadingFont;
+      ctx.fillText('SCAN TO CONNECT', scanX, panelY + metrics.y(30));
 
-      qrLabels.forEach((label, index) => {
-        const x = qrStartX + index * (qrBlockW + qrGap);
-        const y = panelY + metrics.y(44);
+      // Unified QR size for all QR blocks in the footer
+      const unifiedQrSize = metrics.size(76);
+      const qrGap = metrics.x(12);
+      const qrBlockW = unifiedQrSize;
+      const qrImages = (assets && assets.developerQrs) || [];
+      const maxQrToShow = Math.min(3, qrImages.length || 3);
+      // Left-align QR blocks within the Scan column (use the inner content origin)
+      const qrStartX = scanX;
+      const qrTopY = panelY + metrics.y(44);
 
-        fillRoundRect(ctx, x, y, qrSize, qrSize, metrics.radius(12), '#d1d5db');
-        strokeRoundRect(ctx, x, y, qrSize, qrSize, metrics.radius(12), '#94a3b8', metrics.line(1.2));
+      for (let i = 0; i < 3; i++) {
+        const x = qrStartX + i * (qrBlockW + qrGap);
+        if (qrImages[i]) {
+          drawImageContain(ctx, qrImages[i], x, qrTopY, unifiedQrSize, unifiedQrSize, metrics.radius(12));
+        } else {
+          fillRoundRect(ctx, x, qrTopY, unifiedQrSize, unifiedQrSize, metrics.radius(12), '#d1d5db');
+          strokeRoundRect(ctx, x, qrTopY, unifiedQrSize, unifiedQrSize, metrics.radius(12), '#94a3b8', metrics.line(1.2));
+        }
+      }
 
-        ctx.fillStyle = '#475569';
-        ctx.font = `700 ${metrics.font(9)}px Inter, sans-serif`;
-        ctx.textAlign = 'center';
-        const lines = wrapText(ctx, label, qrSize - metrics.x(10), 2);
-        lines.forEach((line, lineIndex) => {
-          ctx.fillText(line, x + qrSize / 2, y + metrics.y(45) + lineIndex * metrics.y(12));
-        });
-        ctx.textAlign = 'left';
+      // Right: developer website promo — three-part layout
+      // Top: title. Bottom: left QR and right description/contact.
+      const devBlockW = rightW;
+      const devY = panelY + metrics.y(18);
+      // Use the unified QR size for the developer column as well
+      const devQrSize = unifiedQrSize;
+
+
+      // Title (top) — match other column headings and use ALL CAPS
+      ctx.fillStyle = '#ffffff';
+      ctx.font = colHeadingFont;
+      ctx.fillText('WEBSITE BUILDER', rightX, panelY + metrics.y(30));
+
+      // Bottom row: QR (left) and description + contact (right)
+      // Align QR top with other column QR top
+      const bottomY = panelY + metrics.y(44);
+      const devQrImage = (assets && assets.developerPortfolio) || ((assets && assets.developerQrs && assets.developerQrs[0]) || null);
+      // Align QR to the left edge of the Website Builder column (rightX)
+      const devQrX = rightX;
+      const devQrY = bottomY;
+      if (devQrImage) {
+        drawImageContain(ctx, devQrImage, devQrX, devQrY, devQrSize, devQrSize, metrics.radius(8));
+      } else {
+        fillRoundRect(ctx, devQrX, devQrY, devQrSize, devQrSize, metrics.radius(8), '#d1d5db');
+      }
+
+      const textX = devQrX + devQrSize + metrics.x(12);
+      const textW = devBlockW - (devQrSize + metrics.x(36));
+
+      ctx.fillStyle = '#e6f2ff';
+      ctx.font = colBodyFont;
+      const descLines = wrapText(ctx, 'Want to have your own website?', textW, 2);
+      descLines.forEach((line, i) => {
+        ctx.fillText(line, textX, bottomY + metrics.y(14) + i * metrics.y(16));
       });
+
+      // Contact line below description
+      ctx.fillStyle = '#e8f3ff';
+      ctx.font = colBodyFont;
+      const devEmail = (designData.developer && designData.developer.email) || '';
+      if (devEmail) {
+        const contactY = bottomY + metrics.y(14) + descLines.length * metrics.y(16) + metrics.y(8);
+        ctx.fillText(`Contact: ${devEmail}`, textX, contactY);
+      }
     }
 
     function getDimensionState() {
@@ -1055,13 +1141,19 @@ const designData = {
           Promise.all(designData.samplePrints.map((item) => loadImage(item.imageUrl))),
           Promise.all(designData.packages.map((item) => loadImage(item.imageUrl))),
           Promise.all((designData.services || []).map((s) => loadImage(s.iconUrl))),
-        ]).then(([sampleImages, packageImages, serviceIcons]) =>
-          // process service icons to remove gray backgrounds and keep them transparent
-          Promise.all((serviceIcons || []).map((img, idx) => processIconImage(img))).then((processed) => ({
-            sampleImages,
-            packageImages,
-            serviceIcons: processed,
-          }))
+          // load all developer QR images if present (normalize path with base)
+          Promise.all((designData.developer && designData.developer.qrImages ? designData.developer.qrImages : []).map((p) => loadImage(normalizeAssetPath(p)))),
+            // load the developer portfolio QR (separate, used for Website Builder column)
+          loadImage(designData.developer && designData.developer.qrPortfolio ? normalizeAssetPath(designData.developer.qrPortfolio) : null),
+        ]).then(([sampleImages, packageImages, serviceIcons, developerQrs, developerPortfolio]) =>
+            // process service icons to remove gray backgrounds and keep them transparent
+            Promise.all((serviceIcons || []).map((img, idx) => processIconImage(img))).then((processed) => ({
+              sampleImages,
+              packageImages,
+              serviceIcons: processed,
+              developerQrs,
+              developerPortfolio,
+            }))
         );
       }
 
@@ -1080,7 +1172,7 @@ const designData = {
       drawTopSection(targetContext, assets.sampleImages, metrics);
       drawServiceList(targetContext, metrics, assets.serviceIcons);
       const priceStickers = drawPackageGrid(targetContext, assets.packageImages, metrics);
-      drawBottomSection(targetContext, metrics);
+      drawBottomSection(targetContext, metrics, assets);
       drawPackagePriceStickers(targetContext, priceStickers, metrics);
     }
 
@@ -1091,18 +1183,44 @@ const designData = {
       const previewWidth = previewAspect >= 1 ? maxPreviewEdge : Math.round(maxPreviewEdge * previewAspect);
       const previewHeight = previewAspect >= 1 ? Math.round(maxPreviewEdge / previewAspect) : maxPreviewEdge;
       const dpr = Math.min(window.devicePixelRatio || 1, 2);
-      const assets = await getLoadedAssets();
+      try {
+        console.log('Tarpaulin: loading assets...');
+        const assets = await getLoadedAssets();
 
-      if (renderId !== renderSequence) return;
+        if (renderId !== renderSequence) return;
 
-      canvas.width = Math.max(1, Math.round(previewWidth * dpr));
-      canvas.height = Math.max(1, Math.round(previewHeight * dpr));
-      canvas.style.width = '100%';
-      canvas.style.height = 'auto';
+        canvas.width = Math.max(1, Math.round(previewWidth * dpr));
+        canvas.height = Math.max(1, Math.round(previewHeight * dpr));
+        canvas.style.width = '100%';
+        canvas.style.height = 'auto';
 
-      context.setTransform(dpr, 0, 0, dpr, 0, 0);
-      renderDesign(context, previewWidth, previewHeight, assets);
-      updateSummaries();
+        context.setTransform(dpr, 0, 0, dpr, 0, 0);
+        try {
+          renderDesign(context, previewWidth, previewHeight, assets);
+        } catch (err) {
+          console.error('renderDesign error', err);
+          context.setTransform(1, 0, 0, 1, 0, 0);
+          context.clearRect(0, 0, canvas.width, canvas.height);
+          context.fillStyle = '#fff0f0';
+          context.fillRect(0, 0, canvas.width, canvas.height);
+          context.fillStyle = '#b91c1c';
+          context.font = '20px Inter, sans-serif';
+          context.fillText('Error rendering design:', 20, 40);
+          context.fillText(String(err && err.message ? err.message : err), 20, 70);
+        }
+
+        updateSummaries();
+      } catch (err) {
+        console.error('renderCanvas error', err);
+        context.setTransform(1, 0, 0, 1, 0, 0);
+        context.clearRect(0, 0, canvas.width, canvas.height);
+        context.fillStyle = '#ffffff';
+        context.fillRect(0, 0, canvas.width, canvas.height);
+        context.fillStyle = '#b91c1c';
+        context.font = '18px Inter, sans-serif';
+        context.fillText('Unable to load assets for tarpaulin preview.', 20, 40);
+        context.fillText(String(err && err.message ? err.message : err), 20, 70);
+      }
     }
 
     async function exportCanvas() {
